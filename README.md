@@ -55,7 +55,7 @@ Terminal**; the prompt starts with `PS`.
 
 ```powershell
 cd C:\Code
-git clone https://github.com/Simpledog1/Automation-HackerRank-Exercism-Problems-.git SolutionSync
+git clone https://github.com/Simpledog1/SolutionSync.git
 cd SolutionSync
 ```
 
