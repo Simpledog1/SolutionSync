@@ -21,12 +21,24 @@ if ($tz.BaseUtcOffset -ne [TimeSpan]::FromHours(8) -or $tz.SupportsDaylightSavin
 }
 
 $action = New-ScheduledTaskAction -Execute $Python -Argument "-m solsync run" -WorkingDirectory $Root
-$trigger = New-ScheduledTaskTrigger -Daily -At $Time
+$user = "$env:USERDOMAIN\$env:USERNAME"
+# Daily at $Time, plus 5 minutes after you sign in or unlock the PC. The extra starts catch
+# runs missed or cut off by sleep/shutdown; once the day's limit is used they exit at once.
+$daily = New-ScheduledTaskTrigger -Daily -At $Time
+$logon = New-ScheduledTaskTrigger -AtLogOn -User $user
+$logon.Delay = "PT5M"
+$unlockClass = Get-CimClass -Namespace ROOT\Microsoft\Windows\TaskScheduler -ClassName MSFT_TaskSessionStateChangeTrigger
+$unlock = New-CimInstance -CimClass $unlockClass -ClientOnly
+$unlock.StateChange = 8   # 8 = session unlock
+$unlock.UserId = $user
+$unlock.Delay = "PT5M"
+$unlock.Enabled = $true
+$trigger = @($daily, $logon, $unlock)
 $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew `
     -ExecutionTimeLimit (New-TimeSpan -Hours 1) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 # Runs as you, only while you are signed in, without admin rights. That is what lets it
 # use your saved Git and Exercism credentials. No password is stored in the task.
-$principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" `
+$principal = New-ScheduledTaskPrincipal -UserId $user `
     -LogonType Interactive -RunLevel Limited
 
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings `
@@ -38,7 +50,8 @@ $info = Get-ScheduledTaskInfo -TaskName $TaskName
 Write-Output "Task:        $($t.TaskName) ($($t.State))"
 Write-Output "Runs:        $($t.Actions[0].Execute) $($t.Actions[0].Arguments)"
 Write-Output "In folder:   $($t.Actions[0].WorkingDirectory)"
-Write-Output "Daily at:    $Time (PC time zone $($tz.Id))"
+Write-Output "Daily at:    $Time (PC time zone $($tz.Id)), plus 5 min after sign-in and unlock"
+Write-Output "Triggers:    $(($t.Triggers | ForEach-Object { $_.CimClass.CimClassName -replace 'MSFT_Task|Trigger','' }) -join ', ')"
 Write-Output "Next run:    $($info.NextRunTime)"
 Write-Output "Catch-up:    $($t.Settings.StartWhenAvailable)  Overlap: $($t.Settings.MultipleInstances)"
 Write-Output "Run level:   $($t.Principal.RunLevel)  Logon: $($t.Principal.LogonType)"

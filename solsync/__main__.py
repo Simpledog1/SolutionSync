@@ -38,6 +38,8 @@ def print_summary(s: dict) -> None:
     print(f"Run {s['run_id']}  mode={s['mode']}  status={s.get('status')}  "
           f"Manila day {s['manila_day']}")
     print(f"  started {s['started']}  finished {s.get('finished')}")
+    if s.get("note"):
+        print(f"  {s['note']}")
     for p, info in s.get("platforms", {}).items():
         print(f"\n[{p}] access: {info['access']}")
         print(f"  repo ok: {info['repo_ok']}" + (

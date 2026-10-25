@@ -92,10 +92,9 @@ class GitFlowTests(unittest.TestCase):
         self.assertEqual(code, runner.EXIT_OK)
         self.assertIn("Python/Ex 1/1.py", self.remote_files(self.hr_bare))
         self.assertIn("Python/Ex 3/ex3.py", self.remote_files(self.ex_bare))  # fairness
-        # same day again: nothing more
+        # same day again: limit already used, so the run stops early and uploads nothing
         code, s = self.run_sync()
-        self.assertEqual(s["counts"]["uploaded_verified"], 0)
-        self.assertEqual(s["counts"]["deferred"], 1)
+        self.assertIn("already used", s["note"])
         self.assertNotIn("Python/Ex 2/1.py", self.remote_files(self.hr_bare))
         # next Manila day: the deferred one goes up, already-uploaded ones are not duplicated
         self.now = datetime(2026, 10, 22, 0, 0, 1, tzinfo=MANILA)
@@ -103,6 +102,18 @@ class GitFlowTests(unittest.TestCase):
         self.assertEqual(s["counts"]["uploaded_verified"], 1)
         self.assertIn("Python/Ex 2/1.py", self.remote_files(self.hr_bare))
         self.assertEqual(int(sh(self.hr_bare, "rev-list", "--count", "main")), 3)
+
+    def test_run_skips_platform_work_once_limit_is_used(self):
+        self.found["hackerrank"] = [cand("hackerrank", 1), cand("hackerrank", 2), cand("hackerrank", 3)]
+        self.cfg.daily_limit = 2
+        self.run_sync()
+        code, s = self.run_sync()  # e.g. started again at sign-in the same day
+        self.assertNotIn("platforms", s)  # stopped before checking repos or platforms
+        self.assertEqual(code, runner.EXIT_OK)
+        self.assertIn("already used", s["note"])
+        self.now = datetime(2026, 10, 22, 6, 0, tzinfo=MANILA)
+        code, s = self.run_sync()  # next day works normally
+        self.assertEqual(s["counts"]["uploaded_verified"], 1)
 
     def test_two_uploads_into_the_same_repo_in_one_run(self):
         # The common case while only one platform is set up: both slots go to HackerRank.

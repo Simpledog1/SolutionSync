@@ -212,8 +212,10 @@ powershell -ExecutionPolicy Bypass -File scripts\install_task.ps1 -Time 06:00
 ```
 
 The task runs as you, only while you are signed in to Windows, without admin rights, so it
-can use your saved GitHub and Exercism logins. If your PC was off at that time, it runs soon
-after you next sign in. Running the install command again just updates the task.
+can use your saved GitHub and Exercism logins. It also starts 5 minutes after you sign in or
+unlock your PC, so a day is never skipped because the PC was off or went to sleep mid-run.
+Once the day's limit is used, those extra starts finish instantly without contacting any
+website. Running the install command again just updates the task.
 
 That's it. From now on it uploads up to `daily_limit` files every day.
 

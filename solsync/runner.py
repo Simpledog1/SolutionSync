@@ -292,6 +292,16 @@ def _run_locked(cfg: Config, live: bool, today: str, summary: dict) -> int:
         st = {p: PlatformState() for p in PLATFORMS}
         log.info("Run %s started (%s), Manila day %s", summary["run_id"], summary["mode"], today)
 
+        # The task also starts at sign-in and unlock; once today's uploads are done (and
+        # nothing is unfinished) there is no work, so skip the platform requests entirely.
+        unfinished = any(ledger.open_batches(p) for p in PLATFORMS)
+        if live and not unfinished and ledger.used_on(today) >= cfg.daily_limit:
+            summary["status"] = "success"
+            summary["note"] = "today's upload limit is already used; nothing to do"
+            summary["quota"] = {"limit": cfg.daily_limit, "used_today": ledger.used_on(today),
+                                "remaining_today": 0}
+            return EXIT_OK
+
         # 1. Repositories: check, finish earlier uploads, read what is on GitHub.
         for p in PLATFORMS:
             repo, s = cfg.repos[p], st[p]
