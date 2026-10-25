@@ -111,7 +111,8 @@ Open `config.json` in the SolutionSync folder and replace the example values wit
 
 | Setting | What it means |
 |---|---|
-| `daily_limit` | Most new solution files uploaded per day, both platforms combined (0–4). |
+| `daily_limit` | Most new solution files uploaded per day, both platforms combined. Default 4; 0 stops uploads. Can also be changed from the dashboard. |
+| `max_daily_limit` | Optional safety maximum for `daily_limit` (default 20). |
 | `uploads_enabled` | Keep `false` until your dry run looks right. While `false`, every run is a dry run. |
 | `max_downloads_per_run` | How many Exercism solutions to download per run (keeps requests polite). |
 | `path` | Where you cloned that solution repo. Use forward slashes `/`. |
@@ -221,6 +222,28 @@ That's it. From now on it uploads up to `daily_limit` files every day.
 
 ## 8. Everyday use
 
+### The dashboard (easiest)
+
+```powershell
+python -m solsync dashboard
+```
+
+Your browser opens `http://127.0.0.1:8765`. **To stop it**, press **Ctrl + C** in the
+PowerShell window (or just close that window). The dashboard is only for looking and
+clicking; the daily automation keeps working whether it is open or not.
+
+| Page | What you can do |
+|---|---|
+| **Dashboard** | See totals (discovered, published, missing, pending, failed), today's uploads and remaining allowance, the last scan, and automation status. Buttons: **Scan Solutions** and **Refresh GitHub Status** (check everything against GitHub without uploading), **Run Sync** (upload, within today's limit; asks first), **Pause / Resume Automation** (turns the scheduled task off and on). |
+| **Solutions** | Every solution with its GitHub status: **Published**, **Missing**, **Pending**, **Failed** or **Unable to Verify** (GitHub couldn't be checked; never shown as Missing). Filter by platform and status, search by name, and open **Details** for the file paths, the exact GitHub link, and the last error. |
+| **Activity** | Scans, uploads, limit changes, pauses and errors, in Philippine time, filterable. |
+| **Settings** | Change the **Daily Upload Limit** (0 = no new uploads). It's saved to `config.json`, so the scheduled task uses the same value. Values above 8 ask for confirmation; the safety maximum is 20 (`"max_daily_limit"` in `config.json`). |
+
+Options: `--port 9000` uses another port; `--no-browser` doesn't open the browser.
+Only your own PC can reach the dashboard, and other websites can't press its buttons.
+
+### Commands
+
 Run these from the SolutionSync folder. You never *need* to; the daily task does the work.
 
 | What | Command |
@@ -238,7 +261,8 @@ Run these from the SolutionSync folder. You never *need* to; the daily task does
 **Solved new problems?** Exercism ones are found automatically. For HackerRank, download a
 fresh export into `inbox\hackerrank` (step 5).
 
-**Change the daily amount:** edit `"daily_limit"` in `config.json` (0 pauses uploads).
+**Change the daily amount:** use the dashboard's Settings page, or edit `"daily_limit"` in
+`config.json` (0 pauses uploads, maximum 20 by default).
 
 ## 9. Where files go
 

@@ -104,7 +104,7 @@ def classify(c: Candidate, repo_files: dict[str, str], language_dirs: dict[str, 
         shas = {git_blob_sha(v) for d in c.files.values() for v in (d, d.replace(b"\r\n", b"\n"))}
         hits = sorted(blob_to_path[s] for s in shas if s in blob_to_path)
         if hits:
-            c.status, c.note = PRESENT, f"same content at {hits[0]}"
+            c.status, c.note, c.dest_paths = PRESENT, f"same content at {hits[0]}", [hits[0]]
             return
 
     if c.platform == "hackerrank":
@@ -125,7 +125,9 @@ def classify(c: Candidate, repo_files: dict[str, str], language_dirs: dict[str, 
         c.status, c.note = AMBIGUOUS, "several folders match: " + ", ".join(matches)
         return
     if len(matches) == 1:
-        c.status, c.dest_paths = PRESENT, [matches[0]]
+        # Point at the exact file(s) on GitHub, not just the folder.
+        files = sorted(p for p in repo_files if p.startswith(matches[0] + "/"))
+        c.status, c.dest_paths = PRESENT, files or [matches[0]]
         c.note = f"folder exists: {matches[0]} (not overwritten)"
         return
 

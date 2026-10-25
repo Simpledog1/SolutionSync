@@ -6,6 +6,7 @@
   check          check repositories and platform access only
   reset-item KEY let a failed item be retried now (e.g. exercism:python/bob)
   inspect-export show the structure of your HackerRank export (no code or values)
+  dashboard      open the local web dashboard (http://127.0.0.1:8765)
 """
 from __future__ import annotations
 
@@ -104,6 +105,9 @@ def main(argv: list[str] | None = None) -> int:
     reset = sub.add_parser("reset-item")
     reset.add_argument("key")
     sub.add_parser("inspect-export")
+    dash = sub.add_parser("dashboard")
+    dash.add_argument("--port", type=int, default=8765)
+    dash.add_argument("--no-browser", action="store_true")
     args = parser.parse_args(argv)
 
     try:
@@ -117,6 +121,11 @@ def main(argv: list[str] | None = None) -> int:
         code, summary = runner.run(cfg, dry_run=args.dry_run)
         print_summary(summary)
         return code
+
+    if args.cmd == "dashboard":
+        from . import dashboard
+        dashboard.serve(args.port, open_browser=not args.no_browser)
+        return runner.EXIT_OK
 
     if args.cmd == "inspect-export":
         return inspect_export(cfg)

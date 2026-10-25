@@ -12,7 +12,10 @@
       "path": "G:/DAILY/Exercism-Problems",
       "remote_url": "https://github.com/Simpledog1/Exercism-Problems.git",
       "branch": "main",
-      "language_dirs": {"python": "Python", "dart": "Dart"}
+      "language_dirs": {
+        "python": "Python",
+        "dart": "Dart"
+      }
     }
   },
   "exercism": {

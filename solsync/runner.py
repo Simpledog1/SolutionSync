@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import uuid
 from dataclasses import dataclass, field
 
@@ -302,78 +303,126 @@ def _run_locked(cfg: Config, live: bool, today: str, summary: dict) -> int:
                                 "remaining_today": 0}
             return EXIT_OK
 
-        # 1. Repositories: check, finish earlier uploads, read what is on GitHub.
-        for p in PLATFORMS:
-            repo, s = cfg.repos[p], st[p]
-            s.problems = gitsync.inspect_repo(repo.path, repo.remote_url, repo.branch)
-            if s.problems:
-                continue
-            s.user_changes = gitsync.user_changes(repo.path)
-            try:
-                if live:
-                    s.problems += reconcile(cfg, repo, ledger, today)
-                s.remote_files, _ = gitsync.remote_files(repo.path, repo.remote_url, repo.branch,
-                                                         may_fetch=live)
-                if live and not s.problems:
-                    ahead, behind = gitsync.ahead_behind(repo.path, repo.branch)
-                    if ahead and behind:
-                        s.problems.append("local and GitHub histories have diverged")
-                    elif ahead:
-                        s.problems.append("local branch has unpushed commits not made by this tool")
-                    elif behind:
-                        gitsync.fast_forward(repo.path, repo.branch)
-                        log.info("%s: fast-forwarded %d commit(s) from GitHub", p, behind)
-            except Exception as exc:  # network down, auth, ff refused because of your edits...
-                s.problems.append(f"repository check failed: {exc}")
-            s.repo_ok = not s.problems
-
-        # 2. Discover completed solutions on each platform.
-        client = discover(cfg, st)
-
-        # 3. Compare with GitHub; download source only for unmatched ones.
-        open_keys = {b["item_key"] for p in PLATFORMS for b in ledger.open_batches(p)}
-        for p in PLATFORMS:
-            s, repo = st[p], cfg.repos[p]
-            s.candidates = [c for c in s.candidates if c.key not in open_keys]
-            for c in s.candidates:
-                classify(c, s.remote_files, repo.language_dirs)
-            if p == "exercism":
-                fetch_sources(cfg, ledger, client, s.candidates, s, save=live)
-                for c in s.candidates:
-                    if c.files is not None and c.status == NEEDS_SOURCE:
-                        classify(c, s.remote_files, repo.language_dirs)
-
-        # 4. Pick at most the remaining quota, alternating platforms fairly.
-        used = ledger.used_on(today)
-        remaining = max(0, cfg.daily_limit - used)
-        first = ledger.get_meta("next_platform", "hackerrank")
-        eligible = {p: [c for c in st[p].candidates if c.status == ELIGIBLE]
-                    for p in PLATFORMS if st[p].repo_ok}
-        selected, deferred = select(eligible, remaining, first)
-        for c in deferred:
-            c.status, c.note = DEFERRED, "daily quota reached; queued for a later day"
-
-        # 5. Upload (live) or describe (dry run).
-        plan = []
-        for c in selected:
-            repo = cfg.repos[c.platform]
-            if live:
-                upload(cfg, repo, ledger, c, today)
-                if c.status == UPLOADED:
-                    ledger.set_meta("next_platform", other(c.platform))
-                    ledger.set_meta("last_success", manila_now().isoformat(timespec="seconds"))
-            plan.append({"item": c.key, "platform": c.platform, "files": c.dest_paths,
-                         "result": c.status if live else "would upload",
-                         "git": ("git add -- <files>; git commit --only -- <files>; "
-                                 f"git push origin {repo.branch}; verify with git ls-remote")})
-        if live:
-            for p in PLATFORMS:
-                for c in st[p].candidates:
-                    ledger.save_item(c)
-
-        return _summarize(cfg, st, ledger, today, first, plan, summary, live)
+        op = "sync" if live else "scan"
+        marker = cfg.state_dir / "current_run.json"  # lets the dashboard show "running"
+        marker.write_text(json.dumps({"pid": os.getpid(), "run_id": summary["run_id"],
+                                      "mode": summary["mode"], "started": summary["started"]}))
+        ledger.event(op, "info", f"{op.capitalize()} started ({summary['mode']})")
+        try:
+            return _work(cfg, live, today, summary, ledger, st, op)
+        finally:
+            marker.unlink(missing_ok=True)
     finally:
         ledger.close()
+
+
+def _work(cfg: Config, live: bool, today: str, summary: dict, ledger: Ledger,
+          st: dict[str, PlatformState], op: str) -> int:
+
+    # 1. Repositories: check, finish earlier uploads, read what is on GitHub.
+    for p in PLATFORMS:
+        repo, s = cfg.repos[p], st[p]
+        s.problems = gitsync.inspect_repo(repo.path, repo.remote_url, repo.branch)
+        if s.problems:
+            continue
+        s.user_changes = gitsync.user_changes(repo.path)
+        try:
+            if live:
+                s.problems += reconcile(cfg, repo, ledger, today)
+            s.remote_files, _ = gitsync.remote_files(repo.path, repo.remote_url, repo.branch,
+                                                     may_fetch=live)
+            if live and not s.problems:
+                ahead, behind = gitsync.ahead_behind(repo.path, repo.branch)
+                if ahead and behind:
+                    s.problems.append("local and GitHub histories have diverged")
+                elif ahead:
+                    s.problems.append("local branch has unpushed commits not made by this tool")
+                elif behind:
+                    gitsync.fast_forward(repo.path, repo.branch)
+                    log.info("%s: fast-forwarded %d commit(s) from GitHub", p, behind)
+        except Exception as exc:  # network down, auth, ff refused because of your edits...
+            s.problems.append(f"repository check failed: {exc}")
+        s.repo_ok = not s.problems
+
+    # 2. Discover completed solutions on each platform.
+    client = discover(cfg, st)
+    now = manila_now().isoformat(timespec="seconds")
+    for p in PLATFORMS:
+        s = st[p]
+        # Remembered so the dashboard can say "Unable to verify" instead of "Missing".
+        ledger.set_meta(f"check:{p}", json.dumps({"time": now, "repo_ok": s.repo_ok,
+                                                  "problems": s.problems, "access": s.access}))
+        if s.problems:
+            ledger.event(op, "error", "GitHub/repository check failed: " + "; ".join(s.problems), p)
+        if not s.access.startswith("ok"):
+            bad = "auth" in s.access or "unavailable" in s.access or "unreadable" in s.access
+            ledger.event(op, "error" if bad else "warning", f"Platform access: {s.access}", p)
+
+    # 3. Compare with GitHub; download source only for unmatched ones.
+    open_keys = {b["item_key"] for p in PLATFORMS for b in ledger.open_batches(p)}
+    for p in PLATFORMS:
+        s, repo = st[p], cfg.repos[p]
+        s.candidates = [c for c in s.candidates if c.key not in open_keys]
+        for c in s.candidates:
+            classify(c, s.remote_files, repo.language_dirs)
+        if p == "exercism":
+            fetch_sources(cfg, ledger, client, s.candidates, s, save=live)
+            for c in s.candidates:
+                if c.files is not None and c.status == NEEDS_SOURCE:
+                    classify(c, s.remote_files, repo.language_dirs)
+
+    # 4. Pick at most the remaining quota, alternating platforms fairly.
+    used = ledger.used_on(today)
+    remaining = max(0, cfg.daily_limit - used)
+    first = ledger.get_meta("next_platform", "hackerrank")
+    eligible = {p: [c for c in st[p].candidates if c.status == ELIGIBLE]
+                for p in PLATFORMS if st[p].repo_ok}
+    for p in PLATFORMS:
+        cands = st[p].candidates
+        if cands or st[p].access.startswith("ok"):
+            n_present = sum(c.status == PRESENT for c in cands)
+            n_missing = sum(c.status in (ELIGIBLE, NEEDS_SOURCE) for c in cands)
+            ledger.event(op, "info", f"Found {len(cands)} completed: {n_present} already on "
+                         f"GitHub, {n_missing} missing", p)
+    selected, deferred = select(eligible, remaining, first)
+    for c in deferred:
+        c.status, c.note = DEFERRED, "daily quota reached; queued for a later day"
+    if deferred and live:
+        ledger.event(op, "warning", f"Daily upload limit reached ({cfg.daily_limit}); "
+                     f"{len(deferred)} waiting for a later day")
+
+    # 5. Upload (live) or describe (dry run).
+    plan = []
+    for c in selected:
+        repo = cfg.repos[c.platform]
+        if live:
+            ledger.event("upload", "info", f"Upload started: {c.title} -> {', '.join(c.dest_paths)}",
+                         c.platform)
+            upload(cfg, repo, ledger, c, today)
+            if c.status == UPLOADED:
+                ledger.set_meta("next_platform", other(c.platform))
+                ledger.set_meta("last_success", manila_now().isoformat(timespec="seconds"))
+                ledger.event("upload", "success", f"Published and verified on GitHub: {c.title} "
+                             f"({c.note})", c.platform)
+            else:
+                ledger.event("upload", "error", f"Upload not completed: {c.title}: "
+                             f"{c.status} {c.note}", c.platform)
+        plan.append({"item": c.key, "platform": c.platform, "files": c.dest_paths,
+                     "result": c.status if live else "would upload",
+                     "git": ("git add -- <files>; git commit --only -- <files>; "
+                             f"git push origin {repo.branch}; verify with git ls-remote")})
+    # Scans record what they found too (statuses only; no repo changes, no quota).
+    for p in PLATFORMS:
+        for c in st[p].candidates:
+            ledger.save_item(c)
+    ledger.set_meta("last_scan", manila_now().isoformat(timespec="seconds"))
+
+    code = _summarize(cfg, st, ledger, today, first, plan, summary, live)
+    ledger.event(op, "success" if code == EXIT_OK else "warning",
+                 f"{op.capitalize()} finished: {summary['status']}; "
+                 f"{summary['counts']['uploaded_verified']} uploaded, "
+                 f"{summary['quota']['remaining_today']} left today")
+    return code
 
 
 def _summarize(cfg, st, ledger, today, first, plan, summary, live) -> int:

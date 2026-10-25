@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SolutionSync</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --text: #1d2330; --muted: #5d6677; --line: #e1e5ec;
+    --accent: #2f5bd3; --ok: #1f7a45; --ok-bg: #e5f4ea; --warn: #8a5a00; --warn-bg: #fdf1d8;
+    --bad: #b42323; --bad-bg: #fbe5e5; --info: #3a4a6b; --info-bg: #e9edf5; --on-accent: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --panel: #1b2029; --text: #e6e9ef; --muted: #9aa3b2; --line: #2c3340;
+      --accent: #7c9cff; --ok: #6fd39a; --ok-bg: #173324; --warn: #f0c060; --warn-bg: #3a2e14;
+      --bad: #ff8a8a; --bad-bg: #3d1c1c; --info: #b9c4dc; --info-bg: #252c3a; --on-accent: #0d1424;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { background: var(--panel); border-bottom: 1px solid var(--line); padding: 12px 16px;
+           display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+  header h1 { font-size: 18px; margin: 0; }
+  nav { display: flex; gap: 4px; flex-wrap: wrap; }
+  nav button { background: none; border: 1px solid transparent; color: var(--muted); padding: 6px 12px;
+               border-radius: 6px; cursor: pointer; font: inherit; }
+  nav button[aria-current="page"] { color: var(--text); border-color: var(--line); background: var(--bg); font-weight: 600; }
+  main { max-width: 1200px; margin: 0 auto; padding: 16px; }
+  section[hidden] { display: none; }
+  h2 { font-size: 16px; margin: 24px 0 10px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  .card .label { color: var(--muted); font-size: 13px; }
+  .card .value { font-size: 24px; font-weight: 650; margin-top: 2px; word-break: break-word; }
+  .card .value.small { font-size: 15px; font-weight: 600; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  button.btn { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--text);
+               padding: 7px 14px; border-radius: 6px; cursor: pointer; }
+  button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  button.btn:disabled { opacity: .5; cursor: not-allowed; }
+  .banner { margin-top: 14px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line);
+            background: var(--panel); white-space: pre-wrap; }
+  .banner.ok { background: var(--ok-bg); color: var(--ok); }
+  .banner.bad { background: var(--bad-bg); color: var(--bad); }
+  .banner.warn { background: var(--warn-bg); color: var(--warn); }
+  .banner pre { margin: 8px 0 0; max-height: 220px; overflow: auto; font-size: 12px; color: var(--text); }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  select, input { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px;
+                  background: var(--panel); color: var(--text); }
+  input[type="search"] { min-width: 220px; flex: 1; }
+  .table-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+  .s-Published, .s-success { background: var(--ok-bg); color: var(--ok); }
+  .s-Missing, .s-warning { background: var(--warn-bg); color: var(--warn); }
+  .s-Failed, .s-error { background: var(--bad-bg); color: var(--bad); }
+  .s-Pending, .s-info, .s-Unable { background: var(--info-bg); color: var(--info); }
+  .muted { color: var(--muted); }
+  .empty { padding: 24px; text-align: center; color: var(--muted); }
+  .settings { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; max-width: 560px; }
+  .settings label { font-weight: 600; display: block; margin-bottom: 4px; }
+  .settings .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .settings input { width: 110px; }
+  .error-text { color: var(--bad); margin-top: 6px; min-height: 1.4em; }
+  dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 14px 0 0; }
+  dl.facts dt { color: var(--muted); }
+  dl.facts dd { margin: 0; word-break: break-word; }
+  dialog { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--text);
+           max-width: min(560px, calc(100vw - 32px)); padding: 18px; }
+  dialog::backdrop { background: rgba(0,0,0,.4); }
+  dialog h3 { margin: 0 0 8px; font-size: 16px; }
+  dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+  a { color: var(--accent); }
+  @media (max-width: 640px) { .card .value { font-size: 20px; } th:nth-child(4), td:nth-child(4),
+    th:nth-child(6), td:nth-child(6) { display: none; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>SolutionSync</h1>
+  <nav>
+    <button data-tab="overview" aria-current="page">Dashboard</button>
+    <button data-tab="solutions">Solutions</button>
+    <button data-tab="activity">Activity</button>
+    <button data-tab="settings">Settings</button>
+  </nav>
+</header>
+
+<main>
+  <div id="load-error" class="banner bad" hidden></div>
+
+  <section id="tab-overview">
+    <div class="cards" id="cards"><div class="card"><div class="label">Loading…</div></div></div>
+    <div class="controls">
+      <button class="btn" data-job="scan">Scan Solutions</button>
+      <button class="btn" data-job="refresh">Refresh GitHub Status</button>
+      <button class="btn primary" data-job="sync">Run Sync</button>
+      <button class="btn" id="pause-btn">Pause Automation</button>
+      <button class="btn" id="resume-btn">Resume Automation</button>
+      <button class="btn" data-goto="activity">View Logs</button>
+      <button class="btn" data-goto="settings">Settings</button>
+    </div>
+    <div id="job" class="banner" hidden></div>
+    <h2>Automation</h2>
+    <div class="cards" id="auto-cards"></div>
+  </section>
+
+  <section id="tab-solutions" hidden>
+    <div class="filters">
+      <select id="f-platform" aria-label="Platform">
+        <option value="">All platforms</option><option value="hackerrank">HackerRank</option><option value="exercism">Exercism</option>
+      </select>
+      <select id="f-status" aria-label="GitHub status">
+        <option value="">All statuses</option><option>Published</option><option>Missing</option>
+        <option>Pending</option><option>Failed</option><option>Unable to Verify</option>
+      </select>
+      <input type="search" id="f-search" placeholder="Search by solution name" aria-label="Search">
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Platform</th><th>Solution</th><th>Language</th><th>Local status</th>
+          <th>GitHub status</th><th>Repository</th><th>Last checked</th><th>Actions</th></tr></thead>
+        <tbody id="sol-body"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <p class="muted" id="sol-count"></p>
+  </section>
+
+  <section id="tab-activity" hidden>
+    <div class="filters">
+      <select id="e-platform" aria-label="Platform">
+        <option value="">All platforms</option><option value="hackerrank">HackerRank</option><option value="exercism">Exercism</option><option value="-">General</option>
+      </select>
+      <select id="e-op" aria-label="Operation">
+        <option value="">All operations</option><option>scan</option><option>sync</option><option>upload</option>
+        <option>settings</option><option>automation</option>
+      </select>
+      <select id="e-status" aria-label="Status">
+        <option value="">All results</option><option>success</option><option>info</option><option>warning</option><option>error</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Time (Manila)</th><th>Platform</th><th>Operation</th><th>Result</th><th>Message</th></tr></thead>
+        <tbody id="ev-body"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="tab-settings" hidden>
+    <div class="settings">
+      <label for="limit-input">Daily Upload Limit</label>
+      <p class="muted" style="margin:0 0 8px">New solution files per Philippine day, HackerRank and Exercism combined.
+        <strong>0</strong> stops all new uploads.</p>
+      <div class="row">
+        <input id="limit-input" type="number" min="0" step="1" inputmode="numeric">
+        <button class="btn primary" id="save-btn">Save Settings</button>
+        <button class="btn" id="cancel-btn">Cancel</button>
+      </div>
+      <div class="error-text" id="limit-error" role="alert"></div>
+      <dl class="facts" id="settings-facts"></dl>
+    </div>
+  </section>
+</main>
+
+<dialog id="confirm">
+  <h3 id="confirm-title"></h3>
+  <p id="confirm-text"></p>
+  <div class="actions"><button class="btn" value="no" id="confirm-no">Cancel</button>
+    <button class="btn primary" value="yes" id="confirm-yes">Continue</button></div>
+</dialog>
+
+<dialog id="details">
+  <h3 id="d-title"></h3>
+  <dl class="facts" id="d-facts"></dl>
+  <div class="actions"><button class="btn" id="d-close">Close</button></div>
+</dialog>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const API = (path, opts = {}) => fetch(path, { ...opts, headers: { "X-SolSync": "1",
+  ...(opts.body ? { "Content-Type": "application/json" } : {}) } })
+  .then(async r => ({ status: r.status, data: await r.json().catch(() => ({})) }));
+
+let state = { overview: null, solutions: [], events: [] };
+const PLATFORM = { hackerrank: "HackerRank", exercism: "Exercism" };
+
+function el(tag, props = {}, ...kids) {            // text only, never innerHTML: titles cannot inject code
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) k === "class" ? n.className = v : n[k] = v;
+  for (const k of kids) n.append(k instanceof Node ? k : document.createTextNode(k ?? ""));
+  return n;
+}
+const pill = (text, cls) => el("span", { class: "pill s-" + (cls || text).split(" ")[0] }, text);
+const when = iso => iso ? new Date(iso).toLocaleString("en-PH", { timeZone: "Asia/Manila",
+  dateStyle: "medium", timeStyle: "short" }) : "never";
+
+function confirmBox(title, text, yes = "Continue") {
+  $("#confirm-title").textContent = title; $("#confirm-text").textContent = text;
+  $("#confirm-yes").textContent = yes;
+  return new Promise(res => {
+    const d = $("#confirm");
+    $("#confirm-yes").onclick = () => { d.close(); res(true); };
+    $("#confirm-no").onclick = () => { d.close(); res(false); };
+    d.oncancel = () => res(false);
+    d.showModal();
+  });
+}
+
+// ---------------------------------------------------------------- tabs
+document.querySelectorAll("nav button, [data-goto]").forEach(b => b.onclick = () => show(b.dataset.tab || b.dataset.goto));
+function show(tab) {
+  document.querySelectorAll("main > section").forEach(s => s.hidden = s.id !== "tab-" + tab);
+  document.querySelectorAll("nav button").forEach(b => b.toggleAttribute("aria-current", b.dataset.tab === tab));
+  if (tab === "solutions") loadSolutions();
+  if (tab === "activity") loadEvents();
+  if (tab === "settings") fillSettings(true);
+}
+
+// ---------------------------------------------------------------- overview
+async function loadOverview() {
+  const r = await API("/api/overview").catch(e => ({ status: 0, data: { error: String(e) } }));
+  const err = $("#load-error");
+  if (r.status !== 200) { err.hidden = false; err.textContent = "Cannot load data: " + (r.data.error || "dashboard server not reachable"); return; }
+  err.hidden = true;
+  state.overview = r.data;
+  const o = r.data, q = o.quota, c = o.counts;
+  const card = (label, value, small) => el("div", { class: "card" }, el("div", { class: "label" }, label),
+    el("div", { class: "value" + (small ? " small" : "") }, String(value)));
+  $("#cards").replaceChildren(
+    card("Solutions discovered", o.total), card("Published on GitHub", c["Published"]),
+    card("Missing from GitHub", c["Missing"]), card("Pending upload / verification", c["Pending"]),
+    card("Failed", c["Failed"]), card("Unable to verify", c["Unable to Verify"]),
+    card("Uploaded today", q.uploaded_today + (q.in_progress_today ? ` (+${q.in_progress_today} in progress)` : "")),
+    card("Remaining today", q.remaining), card("Daily upload limit", q.limit),
+    card("Last successful scan", when(o.last_scan), true), card("Automation", o.automation.state, true));
+  const t = o.automation.task || {};
+  $("#auto-cards").replaceChildren(
+    card("Scheduled task", t.configured === false ? "Not configured" : t.configured ? (t.state || "?") : "Unknown", true),
+    card("Next scheduled run", t.next ? when(t.next) : (t.state === "Disabled" ? "Paused" : "Unknown"), true),
+    card("Last scheduled run", t.last ? when(t.last) : "never", true),
+    card("Running now", o.automation.running ? `Yes (${o.automation.running.mode}, since ${when(o.automation.running.started)})` : "No", true),
+    card("Uploads enabled in config", o.automation.uploads_enabled ? "Yes" : "No (runs are dry runs)", true),
+    card("Last upload", when(o.last_upload), true),
+    ...Object.entries(o.checks).map(([p, ch]) => card(`${PLATFORM[p]} GitHub check`,
+      !ch ? "Not checked yet" : ch.repo_ok ? `OK (${when(ch.time)})` : `Failed: ${ch.problems.join("; ")}`, true)));
+  $("#pause-btn").disabled = !t.configured || t.state === "Disabled";
+  $("#resume-btn").disabled = !t.configured || t.state !== "Disabled";
+  showJob(o.job);
+  fillSettings(false);
+}
+
+function showJob(job) {
+  const box = $("#job"), running = job && job.state === "running";
+  document.querySelectorAll("[data-job]").forEach(b => b.disabled = running || !!state.overview?.automation.running);
+  if (!job) { box.hidden = true; return; }
+  box.hidden = false;
+  if (running) { box.className = "banner"; box.textContent = `${labelFor(job.kind)} running since ${when(job.started)}… this can take a couple of minutes.`; return; }
+  const ok = job.exit_code === 0, locked = job.exit_code === 3;
+  box.className = "banner " + (ok ? "ok" : locked ? "warn" : "bad");
+  box.replaceChildren(el("strong", {}, `${labelFor(job.kind)} finished: ` + (ok ? "success" :
+    job.exit_code === 1 ? "partly done (something needs attention)" : locked ? "skipped, another run was already active" : "failed")),
+    el("pre", {}, job.output || ""));
+}
+const labelFor = k => ({ scan: "Scan", refresh: "GitHub status refresh", sync: "Sync" })[k] || k;
+
+document.querySelectorAll("[data-job]").forEach(b => b.onclick = async () => {
+  const kind = b.dataset.job, q = state.overview?.quota;
+  if (kind === "sync") {
+    const enabled = state.overview?.automation.uploads_enabled;
+    const text = !enabled ? "Uploads are turned off in config.json, so this runs as a dry run and uploads nothing."
+      : q.remaining === 0 ? `Today's limit (${q.limit}) is already used, so nothing will be uploaded.`
+      : `This may commit and push up to ${q.remaining} new solution file(s) to your GitHub repositories today, `
+        + "after checking that each one is missing from GitHub. Existing files are never changed.";
+    if (!await confirmBox("Run Sync?", text, "Run Sync")) return;
+  }
+  document.querySelectorAll("[data-job]").forEach(x => x.disabled = true);
+  const r = await API("/api/jobs", { method: "POST", body: JSON.stringify({ kind }) });
+  if (r.status !== 202) alert(r.data.message || "Could not start");
+  loadOverview(); poll();
+});
+
+for (const [id, action] of [["#pause-btn", "pause"], ["#resume-btn", "resume"]]) $(id).onclick = async () => {
+  const text = action === "pause" ? "Scheduled runs (daily and at sign-in/unlock) will stop until you resume. Manual runs still work."
+    : "Scheduled runs will start again.";
+  if (!await confirmBox(action === "pause" ? "Pause automation?" : "Resume automation?", text)) return;
+  const r = await API("/api/automation", { method: "POST", body: JSON.stringify({ action }) });
+  if (!r.data.ok) alert(r.data.message);
+  loadOverview();
+};
+
+let pollTimer;
+function poll() {
+  clearTimeout(pollTimer);
+  const busy = state.overview?.job?.state === "running" || state.overview?.automation.running;
+  pollTimer = setTimeout(async () => { await loadOverview(); if (!$("#tab-solutions").hidden) loadSolutions();
+    if (!$("#tab-activity").hidden) loadEvents(); poll(); }, busy ? 3000 : 20000);
+}
+
+// ---------------------------------------------------------------- solutions
+async function loadSolutions() {
+  const r = await API("/api/solutions");
+  if (r.status !== 200) return;
+  state.solutions = r.data; renderSolutions();
+}
+["#f-platform", "#f-status", "#f-search"].forEach(s => $(s).oninput = renderSolutions);
+function renderSolutions() {
+  const p = $("#f-platform").value, st = $("#f-status").value, q = $("#f-search").value.trim().toLowerCase();
+  const rows = state.solutions.filter(s => (!p || s.platform === p) && (!st || s.github_status === st)
+    && (!q || (s.title || "").toLowerCase().includes(q)));
+  const body = $("#sol-body");
+  if (!state.solutions.length) { body.replaceChildren(el("tr", {}, el("td", { colSpan: 8, class: "empty" },
+    "No solutions recorded yet. Click Scan Solutions on the Dashboard."))); $("#sol-count").textContent = ""; return; }
+  if (!rows.length) { body.replaceChildren(el("tr", {}, el("td", { colSpan: 8, class: "empty" }, "No solutions match these filters."))); }
+  else body.replaceChildren(...rows.map(s => el("tr", {},
+    el("td", {}, PLATFORM[s.platform]), el("td", {}, s.title), el("td", {}, s.language),
+    el("td", {}, s.local_status), el("td", {}, pill(s.github_status, s.github_status === "Unable to Verify" ? "Unable" : s.github_status)),
+    el("td", {}, s.repository.replace("https://github.com/", "")), el("td", {}, when(s.last_checked)),
+    el("td", {}, el("button", { class: "btn", onclick: () => details(s) }, "Details")))));
+  $("#sol-count").textContent = `Showing ${rows.length} of ${state.solutions.length}`;
+}
+function details(s) {
+  $("#d-title").textContent = `${PLATFORM[s.platform]}: ${s.title}`;
+  const link = s.github_url ? el("a", { href: s.github_url, target: "_blank", rel: "noopener" }, s.github_url) : "Not verified on GitHub";
+  const rows = [["GitHub status", pill(s.github_status, s.github_status === "Unable to Verify" ? "Unable" : s.github_status)],
+    ["Engine status", s.engine_status], ["Language", s.language], ["Local file", s.local_paths.join("\n") || "—"],
+    ["Local status", s.local_status], ["Repository", s.repository], ["Remote path", s.remote_paths.join("\n") || "—"],
+    ["GitHub link", link], ["Last checked", when(s.last_checked)], ["Completion evidence", s.evidence || "—"],
+    ["Note / last error", s.note || "—"], ["Source", s.source_url || "—"]];
+  $("#d-facts").replaceChildren(...rows.flatMap(([k, v]) => [el("dt", {}, k), el("dd", {}, v)]));
+  $("#details").showModal();
+}
+$("#d-close").onclick = () => $("#details").close();
+
+// ---------------------------------------------------------------- activity
+async function loadEvents() {
+  const r = await API("/api/events");
+  if (r.status !== 200) return;
+  state.events = r.data; renderEvents();
+}
+["#e-platform", "#e-op", "#e-status"].forEach(s => $(s).oninput = renderEvents);
+function renderEvents() {
+  const p = $("#e-platform").value, op = $("#e-op").value, st = $("#e-status").value;
+  const rows = state.events.filter(e => (!p || (p === "-" ? !e.platform : e.platform === p))
+    && (!op || e.operation === op) && (!st || e.status === st));
+  $("#ev-body").replaceChildren(...(rows.length ? rows.map(e => el("tr", {}, el("td", {}, when(e.ts)),
+    el("td", {}, PLATFORM[e.platform] || "General"), el("td", {}, e.operation), el("td", {}, pill(e.status)),
+    el("td", {}, e.message))) : [el("tr", {}, el("td", { colSpan: 5, class: "empty" }, "No activity yet."))]));
+}
+
+// ---------------------------------------------------------------- settings
+let editing = false;
+function fillSettings(reset) {
+  const q = state.overview?.quota; if (!q) return;
+  if (reset || !editing) { $("#limit-input").value = q.limit; $("#limit-input").max = q.max; $("#limit-error").textContent = ""; editing = false; }
+  const facts = [["Saved limit", q.limit], ["Uploaded today", q.uploaded_today + (q.in_progress_today ? ` (+${q.in_progress_today} in progress)` : "")],
+    ["Remaining today", q.remaining], ["Next reset (Manila)", when(q.next_reset)], ["Safety maximum", q.max]];
+  $("#settings-facts").replaceChildren(...facts.flatMap(([k, v]) => [el("dt", {}, k), el("dd", {}, String(v))]));
+}
+$("#limit-input").oninput = () => { editing = true; $("#limit-error").textContent = ""; };
+$("#cancel-btn").onclick = () => fillSettings(true);
+$("#save-btn").onclick = async () => {
+  const raw = $("#limit-input").value.trim(), q = state.overview.quota, err = $("#limit-error");
+  if (!/^\d+$/.test(raw)) { err.textContent = raw.startsWith("-") ? "The limit cannot be negative."
+    : "Enter a whole number (no decimals, letters or spaces)."; return; }
+  const value = Number(raw);
+  if (value > q.max) { err.textContent = `The limit cannot be more than ${q.max} (safety maximum).`; return; }
+  let confirm = false;
+  if (value > q.high_warning) {
+    if (!await confirmBox("Save an unusually high limit?", `${value} new files per day is higher than usual. `
+      + "Your GitHub activity will grow quickly and your queue will empty faster.", "Save anyway")) return;
+    confirm = true;
+  }
+  const r = await API("/api/settings", { method: "POST", body: JSON.stringify({ daily_limit: value, confirm }) });
+  if (!r.data.ok) { err.textContent = r.data.message || "Saving failed; the previous limit is still in use."; return; }
+  editing = false; err.textContent = "";
+  await loadOverview(); fillSettings(true);
+  err.textContent = ""; $("#settings-facts").prepend(el("dt", {}, "Saved"), el("dd", {}, `Limit is now ${r.data.daily_limit}.`));
+};
+
+loadOverview().then(poll);
+</script>
+</body>
+</html>

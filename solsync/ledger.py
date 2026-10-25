@@ -47,7 +47,16 @@ CREATE TABLE IF NOT EXISTS items (
     last_seen   TEXT
 );
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
+CREATE TABLE IF NOT EXISTS events (
+    id          INTEGER PRIMARY KEY,
+    ts          TEXT NOT NULL,     -- Manila time
+    platform    TEXT,              -- hackerrank | exercism | NULL (both / app)
+    operation   TEXT NOT NULL,     -- scan | sync | upload | quota | settings | automation
+    status      TEXT NOT NULL,     -- info | success | warning | error
+    message     TEXT NOT NULL      -- never contains secrets
+);
 """
+MAX_EVENTS = 5000  # oldest are pruned so the table cannot grow forever
 
 
 def _now() -> str:
@@ -156,6 +165,21 @@ class Ledger:
         cur = self.db.execute(
             "UPDATE items SET attempts=0, next_retry=NULL WHERE item_key=?", (key,))
         return cur.rowcount > 0
+
+    def verified_on(self, day: str) -> int:
+        q = "SELECT COUNT(*) FROM uploads WHERE day=? AND status='verified'"
+        return self.db.execute(q, (day,)).fetchone()[0]
+
+    # ---- activity events ---------------------------------------------------
+    def event(self, operation: str, status: str, message: str, platform: str | None = None) -> None:
+        self.db.execute("INSERT INTO events(ts, platform, operation, status, message)"
+                        " VALUES (?,?,?,?,?)", (_now(), platform, operation, status, message))
+        self.db.execute("DELETE FROM events WHERE id <= (SELECT MAX(id) FROM events) - ?",
+                        (MAX_EVENTS,))
+
+    def events(self, limit: int = 300) -> list[dict]:
+        rows = self.db.execute("SELECT * FROM events ORDER BY id DESC LIMIT ?", (limit,))
+        return [dict(r) for r in rows]
 
     # ---- meta --------------------------------------------------------------
     def get_meta(self, key: str, default: str = "") -> str:

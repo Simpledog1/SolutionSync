@@ -115,7 +115,7 @@ class MatchingTests(unittest.TestCase):
         c = cand(files={"pangram.py": b"x = 1\n"})
         classify(c, {"Python/Pangram/pangram.py": "different-content"}, PY)
         self.assertEqual(c.status, PRESENT)
-        self.assertEqual(c.dest_paths, ["Python/Pangram"])
+        self.assertEqual(c.dest_paths, ["Python/Pangram/pangram.py"])  # the exact existing file
         self.assertIn("not overwritten", c.note)
 
     def test_08_duplicate_content_elsewhere_is_present(self):

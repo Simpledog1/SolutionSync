@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -47,6 +48,7 @@ class Config:
     exercism_credential_target: str
     hackerrank_inbox: Path
     max_downloads_per_run: int = 10
+    max_daily_limit: int = 20
     state_dir: Path = field(init=False)
     log_dir: Path = field(init=False)
 
@@ -59,6 +61,37 @@ class ConfigError(Exception):
     pass
 
 
+DEFAULT_LIMIT = 4        # files per Manila day, both platforms combined
+DEFAULT_MAX_LIMIT = 20   # safety cap; change "max_daily_limit" in config.json to move it
+
+
+def validate_limit(value, max_limit: int) -> int:
+    """Accept only a whole number from 0 to max_limit (0 = no new uploads)."""
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ConfigError("Daily upload limit must be a whole number (no decimals or text).")
+    if value < 0:
+        raise ConfigError("Daily upload limit cannot be negative.")
+    if value > max_limit:
+        raise ConfigError(f"Daily upload limit cannot be more than {max_limit} "
+                          "(the safety maximum, 'max_daily_limit' in config.json).")
+    return value
+
+
+def save_daily_limit(value, path: Path | None = None) -> int:
+    """Validate and store a new daily limit in config.json, atomically.
+
+    On any error the file is left exactly as it was.
+    """
+    path = path or PROJECT_ROOT / "config.json"
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    limit = validate_limit(value, raw.get("max_daily_limit", DEFAULT_MAX_LIMIT))
+    raw["daily_limit"] = limit
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(raw, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp, path)  # all-or-nothing: readers see the old file or the new one
+    return limit
+
+
 def load_config(path: Path | None = None, root: Path | None = None) -> Config:
     root = root or PROJECT_ROOT
     path = path or root / "config.json"
@@ -67,10 +100,10 @@ def load_config(path: Path | None = None, root: Path | None = None) -> Config:
     except (OSError, ValueError) as exc:
         raise ConfigError(f"Cannot read {path}: {exc}") from exc
 
-    limit = raw.get("daily_limit", 4)
-    if not isinstance(limit, int) or not 0 <= limit <= 4:
-        # The 4-file cap is a hard maximum; config may only lower it.
-        raise ConfigError("daily_limit must be an integer from 0 to 4")
+    max_limit = raw.get("max_daily_limit", DEFAULT_MAX_LIMIT)
+    if not isinstance(max_limit, int) or isinstance(max_limit, bool) or not 1 <= max_limit <= 100:
+        raise ConfigError("max_daily_limit must be a whole number from 1 to 100")
+    limit = validate_limit(raw.get("daily_limit", DEFAULT_LIMIT), max_limit)
 
     repos = {}
     for platform in ("hackerrank", "exercism"):
@@ -96,6 +129,7 @@ def load_config(path: Path | None = None, root: Path | None = None) -> Config:
     return Config(
         root=root,
         daily_limit=limit,
+        max_daily_limit=max_limit,
         uploads_enabled=bool(raw.get("uploads_enabled", False)),
         repos=repos,
         exercism_api_base=ex.get("api_base", "https://api.exercism.org").rstrip("/"),

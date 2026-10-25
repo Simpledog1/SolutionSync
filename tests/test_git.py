@@ -103,6 +103,15 @@ class GitFlowTests(unittest.TestCase):
         self.assertIn("Python/Ex 2/1.py", self.remote_files(self.hr_bare))
         self.assertEqual(int(sh(self.hr_bare, "rev-list", "--count", "main")), 3)
 
+    def test_3_limit_zero_uploads_nothing(self):
+        self.found["hackerrank"] = [cand("hackerrank", 1)]
+        self.found["exercism"] = [cand("exercism", 2)]
+        self.cfg.daily_limit = 0
+        before = (sh(self.hr_bare, "rev-parse", "main"), sh(self.ex_bare, "rev-parse", "main"))
+        code, s = self.run_sync()
+        self.assertEqual(before, (sh(self.hr_bare, "rev-parse", "main"), sh(self.ex_bare, "rev-parse", "main")))
+        self.assertEqual(code, runner.EXIT_OK)
+
     def test_run_skips_platform_work_once_limit_is_used(self):
         self.found["hackerrank"] = [cand("hackerrank", 1), cand("hackerrank", 2), cand("hackerrank", 3)]
         self.cfg.daily_limit = 2
