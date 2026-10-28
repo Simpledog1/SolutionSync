@@ -23,9 +23,12 @@ instead of one giant dump. It runs by itself once a day using Windows Task Sched
 | **Desktop app** | Start menu → **SolutionSync**, in its own window | No, Python is bundled |
 
 Both show the same dashboard and share the same settings, upload history and daily limit;
-you can switch between them at any time. The desktop app is built with
-`scripts\build_desktop.ps1`; see **[DESKTOP.md](DESKTOP.md)** for building, installing,
-where your data lives, updates and troubleshooting.
+you can switch between them at any time.
+
+**[Download the desktop app](https://github.com/Simpledog1/SolutionSync/releases/latest)**:
+get `SolutionSync-<version>-setup.exe` (installer) or the portable zip from the latest release.
+See **[DESKTOP.md](DESKTOP.md)** for installing, building it yourself
+(`scripts\build_desktop.ps1`), where your data lives, updates and troubleshooting.
 
 ---
 

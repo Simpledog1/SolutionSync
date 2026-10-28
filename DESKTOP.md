@@ -20,15 +20,18 @@ already include. If it is missing, the app says so and links to it.
 
 ## Install
 
-### From a release (when one is published)
+### From a release
 
-Download one of these from the repository's **Releases** page:
+Download one of these from the **[latest release](https://github.com/Simpledog1/SolutionSync/releases/latest)**:
 
 - **`SolutionSync-<version>-setup.exe`**: the installer. Installs for your user only (no
   admin rights) into `%LOCALAPPDATA%\Programs\SolutionSync`, with a Start-menu entry and an
   optional desktop shortcut. Uninstall from **Settings → Apps**.
 - **`SolutionSync-<version>-win64-portable.zip`**: no installer. Unzip anywhere and run
   `SolutionSync\SolutionSync.exe`.
+
+The app is not code-signed yet, so on first run Windows SmartScreen may say "Windows protected
+your PC". Click **More info → Run anyway**.
 
 ### Build it yourself
 
