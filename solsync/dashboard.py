@@ -1,10 +1,10 @@
 """Local dashboard: a small web server on 127.0.0.1 plus one HTML page.
 
 The dashboard never uploads or counts anything itself. Every action runs the same
-`python -m solsync ...` command the scheduled task runs, so the daily limit, the run
+`py -m solsync ...` command the scheduled task runs, so the daily limit, the run
 lock and every Git safety check stay in one place (the engine).
 
-    python -m solsync dashboard            # opens http://127.0.0.1:8765
+    py -m solsync dashboard                # opens http://127.0.0.1:8765
 """
 from __future__ import annotations
 
@@ -141,6 +141,15 @@ def solutions(cfg, ledger: Ledger) -> list[dict]:
     return rows
 
 
+def daily_history(ledger: Ledger, days: int, today: datetime | None = None) -> list[dict]:
+    """Verified uploads per Manila day for the last `days` days, oldest first (zeros included)."""
+    end = (today or manila_now()).astimezone(MANILA).date()
+    counts = dict(ledger.db.execute(
+        "SELECT day, COUNT(*) FROM uploads WHERE status='verified' GROUP BY day").fetchall())
+    return [{"day": str(d), "verified": counts.get(str(d), 0)}
+            for d in (end - timedelta(days=i) for i in range(days - 1, -1, -1))]
+
+
 def overview(cfg, ledger: Ledger, rows: list[dict]) -> dict:
     today = manila_day()
     used = ledger.used_on(today)
@@ -164,6 +173,11 @@ def overview(cfg, ledger: Ledger, rows: list[dict]) -> dict:
                   "in_progress_today": used - verified, "used_today": used,
                   "remaining": max(0, cfg.daily_limit - used), "day": today,
                   "next_reset": next_reset()},
+        "today_uploads": [dict(r) for r in ledger.db.execute(
+            "SELECT updated_at AS ts, platform, item_key, file_path FROM uploads"
+            " WHERE day=? AND status='verified' ORDER BY updated_at", (today,))],
+        "history": daily_history(ledger, 14),
+        "recent": ledger.events(8),
         "last_scan": ledger.get_meta("last_scan", ""),
         "last_upload": ledger.get_meta("last_success", ""),
         "automation": {"state": state, "task": task, "running": run,

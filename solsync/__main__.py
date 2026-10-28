@@ -1,4 +1,4 @@
-"""Command line:  python -m solsync <command>
+"""Command line:  py -m solsync <command>
 
   run            sync now (uploads only if "uploads_enabled": true in config.json)
   run --dry-run  show what would happen; changes nothing, uses no quota
@@ -95,7 +95,7 @@ def inspect_export(cfg) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="solsync", description=__doc__,
+    parser = argparse.ArgumentParser(prog="py -m solsync", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="cmd", required=True)
     run_p = sub.add_parser("run")

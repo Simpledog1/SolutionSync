@@ -6,7 +6,7 @@ The daily sync only reads that file; it never calls these (unofficial, undocumen
 endpoints itself.
 
 Re-run it only if you solve challenges that end up as "section unknown":
-    python scripts\\build_hackerrank_sections.py
+    py scripts\\build_hackerrank_sections.py
 """
 import json
 import time
