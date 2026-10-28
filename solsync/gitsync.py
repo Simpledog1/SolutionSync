@@ -24,8 +24,12 @@ class GitError(Exception):
 
 
 def git(repo: Path, *args: str, check: bool = True, input: bytes | None = None) -> str:
-    proc = subprocess.run(["git", "-C", str(repo), *args], capture_output=True,
-                          input=input, env=GIT_ENV, timeout=300)
+    try:
+        proc = subprocess.run(["git", "-C", str(repo), *args], capture_output=True,
+                              input=input, env=GIT_ENV, timeout=300)
+    except FileNotFoundError:
+        raise GitError("Git was not found. Install Git for Windows (https://git-scm.com/download/win) "
+                       "and make sure 'git' works in a new terminal.") from None
     out = proc.stdout.decode("utf-8", "replace").strip()
     if check and proc.returncode != 0:
         err = proc.stderr.decode("utf-8", "replace").strip().splitlines()

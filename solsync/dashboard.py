@@ -8,7 +8,9 @@ lock and every Git safety check stay in one place (the engine).
 """
 from __future__ import annotations
 
+import contextlib
 import ctypes
+import io
 import json
 import os
 import subprocess
@@ -21,8 +23,9 @@ from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from .config import (MANILA, PROJECT_ROOT, ConfigError, load_config, manila_day,
-                     manila_now, save_daily_limit)
+from . import __version__
+from .config import (FROZEN, MANILA, PROJECT_ROOT, ConfigError, data_root, load_config,
+                     manila_day, manila_now, save_daily_limit)
 from .ledger import Ledger
 
 TASK_NAME = "SolutionSync Daily"
@@ -192,8 +195,8 @@ class JobRunner:
 
     COMMANDS = {"scan": ["run", "--dry-run"], "refresh": ["run", "--dry-run"], "sync": ["run"]}
 
-    def __init__(self, root: Path = PROJECT_ROOT, python: str = sys.executable):
-        self.root, self.python = root, python
+    def __init__(self, root: Path | None = None, python: str = sys.executable):
+        self.root, self.python = root or data_root(), python
         self.lock = threading.Lock()
         self.job: dict | None = None
 
@@ -210,15 +213,33 @@ class JobRunner:
 
     def _run(self, job: dict) -> None:
         try:
-            out = subprocess.run([self.python, "-m", "solsync", *self.COMMANDS[job["kind"]]],
-                                 cwd=self.root, capture_output=True, text=True, timeout=3600,
-                                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-            job["output"] = (out.stdout + out.stderr)[-6000:]
-            job["exit_code"] = out.returncode
+            if FROZEN:
+                # The packaged app has no separate Python to call, so the same engine
+                # runs here; its run lock and quota ledger still guard against overlap.
+                job["exit_code"], job["output"] = self._run_in_process(job["kind"])
+            else:
+                out = subprocess.run([self.python, "-m", "solsync", *self.COMMANDS[job["kind"]]],
+                                     cwd=PROJECT_ROOT, env={**os.environ, "SOLSYNC_HOME": str(self.root)},
+                                     capture_output=True, text=True, timeout=3600,
+                                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                job["output"] = (out.stdout + out.stderr)[-6000:]
+                job["exit_code"] = out.returncode
         except Exception as exc:  # timeout, cannot start Python...
             job["output"], job["exit_code"] = str(exc), -1
         job["finished"] = manila_now().isoformat(timespec="seconds")
         job["state"] = "finished"
+
+    def _run_in_process(self, kind: str) -> tuple[int, str]:
+        from . import runner
+        from .__main__ import print_summary
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code, summary = runner.run(load_config(root=self.root), dry_run=kind != "sync")
+            print_summary(summary)
+        return code, buf.getvalue()[-6000:]
+
+    def running(self) -> bool:
+        return bool(self.job and self.job["state"] == "running")
 
 
 # ---------------------------------------------------------------- HTTP
@@ -256,6 +277,9 @@ def make_handler(root: Path, jobs: JobRunner, port: int):
             path = urllib.parse.urlsplit(self.path).path
             if path == "/":
                 return self._send(200, PAGE.read_bytes(), "text/html; charset=utf-8")
+            if path == "/api/ping":  # lets the desktop app recognise a SolutionSync server
+                return self._send(200, {"app": "SolutionSync", "version": __version__,
+                                        "data_root": str(root), "pid": os.getpid()})
             try:
                 cfg, ledger = self._data()
             except ConfigError as exc:
@@ -317,9 +341,16 @@ def make_handler(root: Path, jobs: JobRunner, port: int):
     return Handler
 
 
-def serve(port: int = 8765, open_browser: bool = True, root: Path = PROJECT_ROOT) -> None:
+def make_server(root: Path, port: int) -> tuple[ThreadingHTTPServer, JobRunner]:
+    """Bind 127.0.0.1:port (0 = any free port) and wire the handler to the real port."""
     jobs = JobRunner(root)
-    server = ThreadingHTTPServer(("127.0.0.1", port), make_handler(root, jobs, port))
+    server = ThreadingHTTPServer(("127.0.0.1", port), BaseHTTPRequestHandler)
+    server.RequestHandlerClass = make_handler(root, jobs, server.server_address[1])
+    return server, jobs
+
+
+def serve(port: int = 8765, open_browser: bool = True, root: Path | None = None) -> None:
+    server, jobs = make_server(root or data_root(), port)
     url = f"http://127.0.0.1:{port}/"
     print(f"SolutionSync dashboard: {url}\nPress Ctrl+C in this window to stop it.")
     if open_browser:

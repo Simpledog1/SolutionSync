@@ -1,5 +1,6 @@
 """Dashboard backend: settings, statuses, quota display, job control and HTTP safety."""
 import json
+import os
 import tempfile
 import threading
 import unittest
@@ -59,6 +60,27 @@ class SettingsTests(ProjectTestCase):
             with self.subTest(bad=bad), self.assertRaises(ConfigError):
                 save_daily_limit(bad, self.config)
         self.assertEqual(self.config.read_text(), before)
+
+    def test_config_saved_with_bom_still_loads_and_saves(self):
+        # Notepad and Windows PowerShell may write UTF-8 with a byte order mark
+        self.config.write_bytes(b"\xef\xbb\xbf" + json.dumps(BASE_CONFIG).encode())
+        self.assertEqual(self.cfg().daily_limit, 4)
+        save_daily_limit(5, self.config)
+        self.assertEqual(self.cfg().daily_limit, 5)
+
+    def test_data_root_order(self):
+        from solsync import config
+        with tempfile.TemporaryDirectory() as d, mock.patch.dict("os.environ", {"APPDATA": d}):
+            with mock.patch.dict("os.environ", {"SOLSYNC_HOME": str(self.root)}):
+                self.assertEqual(config.data_root(), self.root)          # 1. explicit override
+            os.environ.pop("SOLSYNC_HOME", None)
+            self.assertEqual(config.data_root(), config.PROJECT_ROOT)    # 3. source default
+            config.location_file().parent.mkdir(parents=True)
+            config.location_file().write_text(str(self.root))
+            self.assertEqual(config.data_root(), self.root)              # 2. remembered folder
+            config.location_file().unlink()
+            with mock.patch.object(config, "FROZEN", True):
+                self.assertEqual(config.data_root(), Path(d) / "SolutionSync")  # packaged default
 
     def test_max_is_configurable(self):
         self.config.write_text(json.dumps({**BASE_CONFIG, "max_daily_limit": 50}))

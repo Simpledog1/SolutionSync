@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -16,6 +17,32 @@ except Exception:
     MANILA = timezone(timedelta(hours=8), "Asia/Manila")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+FROZEN = bool(getattr(sys, "frozen", False))  # running as the packaged desktop app
+
+
+def location_file() -> Path:
+    """Where the desktop app remembers which data folder to use (one line: a path)."""
+    return Path(os.environ.get("APPDATA") or Path.home()) / "SolutionSync" / "data-location.txt"
+
+
+def data_root() -> Path:
+    """The one folder holding config.json, state/, logs/ and inbox/.
+
+    The web dashboard, the desktop app and the scheduled task all resolve it the same
+    way, so they share one config, one upload ledger and one daily quota:
+    SOLSYNC_HOME, else the saved data-location.txt, else the source folder
+    (or %APPDATA%\\SolutionSync for the packaged app, whose install folder is read-only).
+    """
+    env = os.environ.get("SOLSYNC_HOME", "").strip()
+    if env:
+        return Path(env)
+    try:
+        saved = location_file().read_text(encoding="utf-8-sig").strip()
+        if saved:
+            return Path(saved)
+    except OSError:
+        pass
+    return location_file().parent if FROZEN else PROJECT_ROOT
 
 
 def manila_now() -> datetime:
@@ -82,8 +109,8 @@ def save_daily_limit(value, path: Path | None = None) -> int:
 
     On any error the file is left exactly as it was.
     """
-    path = path or PROJECT_ROOT / "config.json"
-    raw = json.loads(path.read_text(encoding="utf-8"))
+    path = path or data_root() / "config.json"
+    raw = json.loads(path.read_text(encoding="utf-8-sig"))  # tolerate Notepad's BOM
     limit = validate_limit(value, raw.get("max_daily_limit", DEFAULT_MAX_LIMIT))
     raw["daily_limit"] = limit
     tmp = path.with_suffix(".json.tmp")
@@ -93,10 +120,10 @@ def save_daily_limit(value, path: Path | None = None) -> int:
 
 
 def load_config(path: Path | None = None, root: Path | None = None) -> Config:
-    root = root or PROJECT_ROOT
+    root = root or data_root()
     path = path or root / "config.json"
     try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
+        raw = json.loads(path.read_text(encoding="utf-8-sig"))  # tolerate Notepad's BOM
     except (OSError, ValueError) as exc:
         raise ConfigError(f"Cannot read {path}: {exc}") from exc
 
