@@ -197,6 +197,9 @@ class HttpTests(ProjectTestCase):
         self.assertEqual(o["counts"]["Missing"], 1)
         self.assertEqual(o["counts"]["Failed"], 1)
         self.assertEqual(o["quota"], {**o["quota"], "limit": 4, "uploaded_today": 1, "remaining": 3})
+        self.assertEqual(len(o["today_uploads"]), 1)          # the one verified upload today
+        self.assertEqual(o["history"][-1], {"day": manila_day(), "verified": 1})
+        self.assertEqual(len(o["history"]), 14)
         code, rows = self.call("/api/solutions")
         published = next(r for r in rows if r["github_status"] == "Published")
         self.assertEqual(published["github_url"], "https://github.com/me/HR/blob/main/Python/Challenge%200/1.py")

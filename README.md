@@ -241,9 +241,9 @@ clicking; the daily automation keeps working whether it is open or not.
 
 | Page | What you can do |
 |---|---|
-| **Dashboard** | See totals (discovered, published, missing, pending, failed), today's uploads and remaining allowance, the last scan, and automation status. Buttons: **Scan Solutions** and **Refresh GitHub Status** (check everything against GitHub without uploading), **Run Sync** (upload, within today's limit; asks first), **Pause / Resume Automation** (turns the scheduled task off and on). |
-| **Solutions** | Every solution with its GitHub status: **Published**, **Missing**, **Pending**, **Failed** or **Unable to Verify** (GitHub couldn't be checked; never shown as Missing). Filter by platform and status, search by name, and open **Details** for the file paths, the exact GitHub link, and the last error. |
-| **Activity** | Scans, uploads, limit changes, pauses and errors, in Philippine time, filterable. |
+| **Overview** | A conditions bulletin first (**Fair** = all good, **Caution** = needs a look, **Storm** = something failed), then **today's tide**: today's uploads on a midnight-to-midnight Manila timeline against your limit. Also each repository's progress, the totals (discovered, published, missing; pending/failed/unverified collapse into "Nothing" when all zero), the last 14 days, and recent activity. Buttons: **Scan solutions** and **Refresh GitHub status** (check everything against GitHub without uploading), **Run sync** (upload, within today's limit; asks first), **Pause / Resume automation** (turns the scheduled task off and on). The sidebar flag shows whether automation is active, paused, or running. |
+| **Solutions** | Every solution with its GitHub status: **Published**, **Missing**, **Pending**, **Failed** or **Unable to Verify** (GitHub couldn't be checked; never shown as Missing). Filter by platform and status, search by name, and click a row for details: file paths, the exact GitHub link, and the last error. On a phone the table becomes a list. |
+| **Activity logs** | Scans, uploads, limit changes, pauses and errors, grouped by day in Philippine time, filterable. |
 | **Settings** | Change the **Daily Upload Limit** (0 = no new uploads). It's saved to `config.json`, so the scheduled task uses the same value. Values above 8 ask for confirmation; the safety maximum is 20 (`"max_daily_limit"` in `config.json`). |
 
 Options: `--port 9000` uses another port; `--no-browser` doesn't open the browser.

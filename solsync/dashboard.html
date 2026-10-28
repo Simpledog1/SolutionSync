@@ -3,182 +3,499 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>SolutionSync</title>
 <style>
+:root {
+  --ground: #e6eeeb; --panel: #ffffff; --panel-2: #f2f7f5; --ink: #0f2a33; --ink-2: #3a5761; --ink-3: #536f79;
+  --line: #cddbd6; --line-2: #e0e9e5;
+  --rail: #0e3442; --rail-2: #164a5b; --rail-ink: #e2efea; --rail-ink-2: #a9cbc1; --rail-line: #22596a;
+  --foam: #3f9b88; --foam-ink: #1b6a5a; --foam-bg: #dcefe8;
+  --buoy: #d9581c; --buoy-ink: #a3400f; --buoy-bg: #fbe6da;
+  --storm: #c4372d; --storm-ink: #a12a21; --storm-bg: #f8e0dc;
+  --brass: #b08a1e; --brass-ink: #765c10; --sand: #dcc790; --mist: #a3b6bb;
+  --btn: #0e3442; --btn-ink: #ffffff; --btn-hover: #164a5b;
+  --shadow: 0 1px 2px rgba(14, 52, 66, .06), 0 6px 18px -8px rgba(14, 52, 66, .18);
+  --f-ui: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-num: Bahnschrift, "DIN Alternate", "DIN 2014", "Segoe UI", sans-serif;
+  --r: 8px;
+}
+@media (prefers-color-scheme: dark) {
   :root {
-    --bg: #f6f7f9; --panel: #ffffff; --text: #1d2330; --muted: #5d6677; --line: #e1e5ec;
-    --accent: #2f5bd3; --ok: #1f7a45; --ok-bg: #e5f4ea; --warn: #8a5a00; --warn-bg: #fdf1d8;
-    --bad: #b42323; --bad-bg: #fbe5e5; --info: #3a4a6b; --info-bg: #e9edf5; --on-accent: #ffffff;
+    --ground: #08171d; --panel: #0e232b; --panel-2: #122c36; --ink: #e2eeea; --ink-2: #a8c4bd; --ink-3: #8eada6;
+    --line: #1f3d47; --line-2: #183540;
+    --rail: #0c3340; --rail-2: #154656; --rail-ink: #e2eeea; --rail-ink-2: #a3c7bd; --rail-line: #1e5262;
+    --foam: #4fc1a8; --foam-ink: #84dcc8; --foam-bg: #10372f;
+    --buoy: #f08a4b; --buoy-ink: #f6a877; --buoy-bg: #3a2416;
+    --storm: #ff7b6f; --storm-ink: #ff9d93; --storm-bg: #3d1b19;
+    --brass: #d4b04a; --brass-ink: #e3c66d; --sand: #8c7a45; --mist: #56717a;
+    --btn: #4fc1a8; --btn-ink: #062019; --btn-hover: #6fd1bb;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 22px -10px rgba(0, 0, 0, .6);
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #12151b; --panel: #1b2029; --text: #e6e9ef; --muted: #9aa3b2; --line: #2c3340;
-      --accent: #7c9cff; --ok: #6fd39a; --ok-bg: #173324; --warn: #f0c060; --warn-bg: #3a2e14;
-      --bad: #ff8a8a; --bad-bg: #3d1c1c; --info: #b9c4dc; --info-bg: #252c3a; --on-accent: #0d1424;
-    }
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
-         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  header { background: var(--panel); border-bottom: 1px solid var(--line); padding: 12px 16px;
-           display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
-  header h1 { font-size: 18px; margin: 0; }
-  nav { display: flex; gap: 4px; flex-wrap: wrap; }
-  nav button { background: none; border: 1px solid transparent; color: var(--muted); padding: 8px 12px;
-               border-radius: 6px; cursor: pointer; font: inherit; }
-  nav button[aria-current="page"] { color: var(--text); border-color: var(--line); background: var(--bg); font-weight: 600; }
-  main { max-width: 1200px; margin: 0 auto; padding: 16px; }
-  section[hidden] { display: none; }
-  h2 { font-size: 16px; margin: 24px 0 10px; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
-  .card .label { color: var(--muted); font-size: 13px; }
-  .card .value { font-size: 24px; font-weight: 650; margin-top: 2px; word-break: break-word; }
-  .card .value.small { font-size: 15px; font-weight: 600; }
-  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-  button.btn { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--text);
-               padding: 8px 14px; border-radius: 6px; cursor: pointer; }
-  button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-  button.btn:disabled { opacity: .5; cursor: not-allowed; }
-  .banner { margin-top: 14px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line);
-            background: var(--panel); white-space: pre-wrap; }
-  .banner.ok { background: var(--ok-bg); color: var(--ok); }
-  .banner.bad { background: var(--bad-bg); color: var(--bad); }
-  .banner.warn { background: var(--warn-bg); color: var(--warn); }
-  .banner pre { margin: 8px 0 0; max-height: 220px; overflow: auto; font-size: 12px; color: var(--text); }
-  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-  select, input { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px;
-                  background: var(--panel); color: var(--text); }
-  input[type="search"] { min-width: 220px; flex: 1; }
-  .table-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
-  table { border-collapse: collapse; width: 100%; font-size: 14px; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; font-size: 13px; white-space: nowrap; }
-  tr:last-child td { border-bottom: none; }
-  .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
-  .s-Published, .s-success { background: var(--ok-bg); color: var(--ok); }
-  .s-Missing, .s-warning { background: var(--warn-bg); color: var(--warn); }
-  .s-Failed, .s-error { background: var(--bad-bg); color: var(--bad); }
-  .s-Pending, .s-info, .s-Unable { background: var(--info-bg); color: var(--info); }
-  .muted { color: var(--muted); }
-  .empty { padding: 24px; text-align: center; color: var(--muted); }
-  .settings { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; max-width: 560px; }
-  .settings label { font-weight: 600; display: block; margin-bottom: 4px; }
-  .settings .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .settings input { width: 110px; }
-  .error-text { color: var(--bad); margin-top: 6px; min-height: 1.4em; }
-  dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 14px 0 0; }
-  dl.facts dt { color: var(--muted); }
-  dl.facts dd { margin: 0; word-break: break-word; }
-  dialog { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--text);
-           max-width: min(560px, calc(100vw - 32px)); padding: 18px; }
-  dialog::backdrop { background: rgba(0,0,0,.4); }
-  dialog h3 { margin: 0 0 8px; font-size: 16px; }
-  dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-  a { color: var(--accent); }
-  @media (max-width: 640px) { .card .value { font-size: 20px; } th:nth-child(4), td:nth-child(4),
-    th:nth-child(6), td:nth-child(6) { display: none; } }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 15px/1.5 var(--f-ui); accent-color: var(--foam); caret-color: var(--foam); }
+::selection { background: var(--foam); color: #fff; }
+* { scrollbar-color: var(--mist) transparent; scrollbar-width: thin; }
+:focus-visible { outline: 2px solid var(--foam); outline-offset: 2px; border-radius: 4px; }
+a { color: var(--foam-ink); text-underline-offset: 3px; }
+button { font: inherit; color: inherit; }
+.num { font-family: var(--f-num); font-variant-numeric: tabular-nums; letter-spacing: .005em; }
+.ico { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+[hidden] { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- shell ---------- */
+.app { display: grid; grid-template-columns: 236px minmax(0, 1fr); min-height: 100vh; }
+.rail { background: var(--rail); color: var(--rail-ink); display: flex; flex-direction: column; padding: 22px 14px 18px; position: sticky; top: 0; height: 100vh; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 26px; }
+.brand svg { width: 30px; height: 30px; }
+.brand-name { font: 600 19px/1 var(--f-num); letter-spacing: .015em; }
+.brand-name span { color: var(--foam); }
+.nav { display: grid; gap: 2px; }
+.nav button { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 0; background: none; color: var(--rail-ink-2); border-radius: 6px; cursor: pointer; text-align: left; font-weight: 500; transition: background .15s, color .15s; }
+.nav button:hover { background: rgba(226, 239, 234, .06); color: var(--rail-ink); }
+.nav button[aria-current="page"] { background: var(--rail-2); color: var(--rail-ink); position: relative; }
+.nav button[aria-current="page"]::after { content: ""; position: absolute; right: 10px; top: 50%; width: 7px; height: 12px; margin-top: -6px; background: var(--foam); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.nav button[aria-current="page"] .count { margin-right: 14px; }
+.nav .count { margin-left: auto; font: 500 12px var(--f-num); color: var(--rail-ink-2); }
+.pennant { margin-top: auto; border-top: 1px solid var(--rail-line); padding: 16px 8px 0; display: grid; gap: 4px; }
+.pennant-row { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+.flag { width: 10px; height: 18px; clip-path: polygon(0 0, 100% 50%, 0 100%); background: var(--mist); flex: none; }
+.state-active .flag { background: var(--foam); }
+.state-paused .flag { background: var(--brass); }
+.state-syncing .flag { background: var(--foam); }
+@media (prefers-reduced-motion: no-preference) { .state-syncing .flag { animation: wave 1.2s ease-in-out infinite; } }
+.state-off .flag { background: var(--buoy); }
+@keyframes wave { 50% { transform: scaleX(.55); } }
+.pennant small { color: var(--rail-ink-2); font-size: 13px; line-height: 1.4; }
+
+.main { min-width: 0; padding: 26px 34px 48px; display: grid; align-content: start; gap: 22px; }
+.pagehead { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.pagehead h1 { margin: 0; font: 600 26px/1.15 var(--f-num); letter-spacing: -.005em; }
+.pagehead p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; }
+.actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-weight: 600; font-size: 14px; cursor: pointer; transition: background .15s, border-color .15s, transform .1s; box-shadow: 0 1px 1px rgba(14, 52, 66, .05); }
+.btn:hover:not(:disabled) { border-color: var(--mist); background: var(--panel-2); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.primary { background: var(--btn); border-color: var(--btn); color: var(--btn-ink); }
+.btn.primary:hover:not(:disabled) { background: var(--btn-hover); border-color: var(--btn-hover); }
+.btn.quiet { border-color: transparent; background: none; box-shadow: none; }
+.btn .ico { width: 16px; height: 16px; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); }
+.panel-head { display: flex; align-items: baseline; gap: 12px; padding: 16px 20px 0; }
+.panel-head h2 { margin: 0; font: 600 16px/1.3 var(--f-num); letter-spacing: .01em; }
+.panel-head .meta { margin-left: auto; color: var(--ink-3); font-size: 13px; }
+.panel-body { padding: 14px 20px 18px; }
+
+/* status chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; background: var(--panel-2); color: var(--ink-2); }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip.published, .chip.success { background: var(--foam-bg); color: var(--foam-ink); }
+.chip.missing, .chip.warning { background: var(--buoy-bg); color: var(--buoy-ink); }
+.chip.failed, .chip.error { background: var(--storm-bg); color: var(--storm-ink); }
+.chip.pending, .chip.info { background: var(--panel-2); color: var(--ink-2); }
+.chip.unverified { background: var(--panel-2); color: var(--ink-3); }
+.chip.unverified::before { background: none; border: 1.5px solid currentColor; width: 5px; height: 5px; }
+.tag { display: inline-block; padding: 1px 8px; border-radius: 4px; background: var(--panel-2); color: var(--ink-2); font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+
+/* ---------- bulletin ---------- */
+.bulletin { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: var(--r); border: 1px solid var(--line); background: var(--panel); box-shadow: var(--shadow); }
+.bulletin .flag { width: 14px; height: 26px; }
+.bulletin.fair .flag { background: var(--foam); }
+.bulletin.caution .flag { background: var(--buoy); }
+.bulletin.storm { background: var(--storm-bg); border-color: var(--storm); }
+.bulletin.storm .flag { background: var(--storm); }
+.bulletin.caution { background: var(--buoy-bg); border-color: var(--buoy); }
+.bulletin h2 { margin: 0; font: 600 18px/1.3 var(--f-num); }
+.bulletin p { margin: 2px 0 0; color: var(--ink-2); font-size: 14px; }
+.bulletin.storm p, .bulletin.caution p { color: var(--ink); }
+
+/* ---------- overview grid ---------- */
+.ov-top { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 22px; }
+.ov-low { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 22px; }
+
+.tide-figure { display: flex; align-items: baseline; gap: 10px; padding: 6px 20px 0; }
+.tide-figure .big { font: 600 52px/1 var(--f-num); letter-spacing: -.01em; }
+.tide-figure .of { font: 500 20px var(--f-num); color: var(--ink-2); }
+.tide-figure .note { margin-left: auto; color: var(--ink-2); font-size: 14px; text-align: right; }
+.tide-chart { padding: 6px 12px 10px; }
+.tide-chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.tide-fill { fill: var(--foam); opacity: .16; }
+.tide-line { fill: none; stroke: var(--foam-ink); stroke-width: 2.25; stroke-linejoin: round; }
+.tide-limit { stroke: var(--brass); stroke-width: 1.25; stroke-dasharray: 5 5; }
+.tide-axis { stroke: var(--line); stroke-width: 1; }
+.tide-tick { fill: var(--ink-3); font: 500 11.5px var(--f-num); }
+.tide-sched { stroke: var(--brass); stroke-width: 1; opacity: .7; }
+.tide-now { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 2 3; }
+.tide-mark { fill: var(--panel); stroke: var(--foam-ink); stroke-width: 2; }
+.tide-label { fill: var(--brass-ink); font: 600 11.5px var(--f-num); }
+.tide-now-label { fill: var(--ink-2); font: 600 11.5px var(--f-num); }
+.tide-event { fill: var(--foam-ink); font: 600 12px var(--f-num); }
+.tide-plateau { stroke: var(--foam-ink); stroke-width: 1; stroke-dasharray: 1 3; opacity: .7; }
+
+.stations .station { padding: 14px 20px; border-top: 1px solid var(--line-2); display: grid; gap: 8px; }
+.stations .station:first-of-type { border-top: 0; }
+.station-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.station-head h3 { margin: 0; font: 600 16px var(--f-num); }
+.station-head a { color: inherit; text-decoration: none; }
+.station-head a:hover { text-decoration: underline; }
+.station-head .chip { margin-left: auto; }
+.seg { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--line-2); }
+.seg i { display: block; height: 100%; }
+.seg .s-pub { background: var(--foam); } .seg .s-miss { background: var(--sand); } .seg .s-pend { background: var(--mist); }
+.seg .s-fail { background: var(--storm); } .seg .s-unv { background: var(--ink-3); opacity: .45; }
+.station-facts { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13.5px; color: var(--ink-2); }
+.station-facts b { color: var(--ink); font-weight: 600; }
+.station-note { font-size: 13px; color: var(--ink-3); }
+
+.figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; margin: 0; }
+/* hairline separators that survive any wrap; the outer edges are clipped by overflow */
+.fig { padding: 16px 18px; min-width: 0; box-shadow: -1px 0 0 var(--line-2), 0 -1px 0 var(--line-2); }
+.fig.calm .v { color: var(--foam-ink); font-size: 22px; padding-top: 6px; }
+.fig dt { font-size: 13px; color: var(--ink-2); font-weight: 600; }
+.fig dd { margin: 4px 0 0; }
+.fig .v { font: 600 30px/1.1 var(--f-num); display: block; }
+.fig .proof { display: block; margin-top: 4px; font-size: 12.5px; color: var(--ink-3); line-height: 1.35; }
+.fig.alert .v { color: var(--storm-ink); }
+.fig.warn .v { color: var(--buoy-ink); }
+
+.history { display: grid; grid-template-columns: repeat(14, 1fr); align-items: end; gap: 6px; height: 120px; position: relative; padding-top: 14px; }
+.history .day { display: grid; grid-template-rows: 1fr auto; height: 100%; gap: 6px; text-align: center; }
+.history .bar { align-self: end; border-radius: 3px 3px 1px 1px; background: var(--foam); min-height: 3px; opacity: .85; }
+.history .bar.zero { background: var(--line); }
+.history .day.today .bar { opacity: 1; background: var(--foam-ink); }
+.history .lbl { font: 500 11px var(--f-num); color: var(--ink-3); }
+.history .day.today .lbl { color: var(--ink); font-weight: 700; }
+
+.feed { list-style: none; margin: 0; padding: 0; }
+.feed li { display: grid; grid-template-columns: 18px 52px minmax(0, 1fr); gap: 10px; align-items: start; padding: 9px 0; border-top: 1px solid var(--line-2); font-size: 14px; }
+.feed li:first-child { border-top: 0; }
+.feed time { color: var(--ink-3); font: 500 13px var(--f-num); padding-top: 1px; }
+.feed .msg { min-width: 0; overflow-wrap: anywhere; }
+.feed .ico { width: 16px; height: 16px; margin-top: 2px; }
+.feed .s-success { color: var(--foam-ink); } .feed .s-warning { color: var(--buoy-ink); } .feed .s-error { color: var(--storm-ink); } .feed .s-info { color: var(--ink-3); }
+
+/* run strip (job progress) */
+.run { border-radius: var(--r); border: 1px solid var(--line); background: var(--panel); box-shadow: var(--shadow); overflow: hidden; }
+.run-main { display: flex; align-items: center; gap: 4px 12px; padding: 10px 10px 10px 16px; flex-wrap: wrap; }
+.run-main strong { font-weight: 600; }
+.run-main .btn { margin-left: auto; }
+.run.ok { border-color: var(--foam); } .run.warn { border-color: var(--buoy); } .run.bad { border-color: var(--storm); }
+.run.ok .ico { color: var(--foam-ink); } .run.warn .ico { color: var(--buoy-ink); } .run.bad .ico { color: var(--storm-ink); }
+.progress { height: 3px; background: var(--line-2); position: relative; overflow: hidden; }
+.progress::after { content: ""; position: absolute; inset: 0; background: var(--foam); opacity: .7; }
+@media (prefers-reduced-motion: no-preference) { .progress::after { animation: breathe 1.6s ease-in-out infinite; } }
+@keyframes breathe { 50% { opacity: .2; } }
+.run details { border-top: 1px solid var(--line-2); padding: 8px 16px 12px; }
+.run summary { cursor: pointer; color: var(--ink-2); font-size: 13.5px; }
+.run pre { margin: 8px 0 0; max-height: 240px; overflow: auto; font: 12px/1.5 Consolas, "Cascadia Mono", monospace; color: var(--ink-2); white-space: pre-wrap; }
+
+/* ---------- solutions ---------- */
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.search { position: relative; flex: 1 1 260px; max-width: 420px; }
+.search .ico { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--ink-3); width: 16px; height: 16px; }
+input[type="search"], input[type="number"], select { font: inherit; font-size: 14px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 9px 12px; min-height: 40px; }
+input[type="search"] { width: 100%; padding-left: 34px; }
+input:hover, select:hover { border-color: var(--mist); }
+.segmented { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); padding: 3px; gap: 2px; }
+.segmented button { border: 0; background: none; padding: 6px 12px; border-radius: 5px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.segmented button[aria-pressed="true"] { background: var(--rail); color: var(--rail-ink); }
+.result-count { margin-left: auto; color: var(--ink-3); font-size: 13.5px; }
+
+.table-shell { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+thead th { text-align: left; font: 600 12.5px var(--f-num); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); padding: 12px 16px; background: var(--panel-2); border-bottom: 1px solid var(--line); white-space: nowrap; }
+tbody td { padding: 12px 16px; border-bottom: 1px solid var(--line-2); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr.row { cursor: pointer; transition: background .12s; }
+tbody tr.row:hover, tbody tr.row:focus-visible { background: var(--panel-2); outline: none; }
+tbody tr.row:focus-visible td:first-child { box-shadow: inset 2px 0 0 var(--foam); }
+.sol-name { font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+.sol-sub { display: block; color: var(--ink-3); font-size: 12.5px; margin-top: 2px; max-width: 46ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.muted { color: var(--ink-3); }
+.m-only { display: none; }
+.empty { padding: 44px 20px; text-align: center; color: var(--ink-2); }
+.empty strong { display: block; color: var(--ink); font: 600 16px var(--f-num); margin-bottom: 4px; }
+
+/* ---------- activity ---------- */
+.timeline-day { padding: 10px 20px 4px; font: 600 13px var(--f-num); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); background: var(--panel-2); border-top: 1px solid var(--line-2); }
+.timeline-day:first-child { border-top: 0; }
+.tl { list-style: none; margin: 0; padding: 0 20px; }
+.tl li { display: grid; grid-template-columns: 54px 18px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 11px 0; border-top: 1px solid var(--line-2); }
+.tl li:first-child { border-top: 0; }
+.tl time { font: 500 13px var(--f-num); color: var(--ink-3); padding-top: 1px; }
+.tl .ico { width: 16px; height: 16px; margin-top: 2px; }
+.tl .msg { overflow-wrap: anywhere; }
+.tl .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+/* ---------- settings ---------- */
+.settings-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+.field-label { display: block; font: 600 15px var(--f-num); margin-bottom: 4px; }
+.help { margin: 0 0 14px; color: var(--ink-2); font-size: 14px; max-width: 60ch; }
+.stepper { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); }
+.stepper button { border: 0; background: var(--panel-2); width: 44px; cursor: pointer; display: grid; place-items: center; color: var(--ink-2); }
+.stepper button:hover { color: var(--ink); background: var(--line-2); }
+.stepper input { border: 0; border-left: 1px solid var(--line); border-right: 1px solid var(--line); border-radius: 0; width: 88px; text-align: center; font: 600 22px var(--f-num); min-height: 48px; -moz-appearance: textfield; }
+.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.limit-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.field-msg { margin-top: 10px; font-size: 14px; }
+.field-msg:empty { margin-top: 0; }
+.field-msg.err { color: var(--storm-ink); }
+.field-msg.ok { color: var(--foam-ink); }
+.slots { display: flex; gap: 5px; flex-wrap: wrap; margin: 16px 0 6px; }
+.slots i { width: 22px; height: 30px; border-radius: 4px; border: 1.5px solid var(--line); background: var(--panel-2); }
+.slots i.used { background: var(--foam); border-color: var(--foam); }
+.slots i.over { background: var(--sand); border-color: var(--brass); }
+.slots-note { font-size: 13.5px; color: var(--ink-2); }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 8px 18px; margin: 0; font-size: 14px; }
+.facts dt { color: var(--ink-2); }
+.facts dd { margin: 0; overflow-wrap: anywhere; }
+
+/* ---------- dialogs & toasts ---------- */
+dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); padding: 0; box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .45); max-width: min(520px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(6, 18, 23, .45); }
+.dlg { padding: 22px 22px 18px; }
+.dlg h3 { margin: 0 0 8px; font: 600 18px var(--f-num); }
+.dlg p { margin: 0; color: var(--ink-2); }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+dialog.drawer { margin: 0 0 0 auto; height: 100vh; max-height: 100vh; width: min(500px, 100vw); max-width: 100vw; border-radius: 0; border-width: 0 0 0 1px; }
+.drawer-head { display: flex; align-items: flex-start; gap: 12px; padding: 22px 22px 14px; border-bottom: 1px solid var(--line-2); }
+.drawer-head h3 { margin: 0; font: 600 20px/1.25 var(--f-num); overflow-wrap: anywhere; }
+.drawer-head p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; }
+.drawer-head .btn { margin-left: auto; }
+.drawer-body { padding: 18px 22px; display: grid; gap: 18px; }
+.drawer-body .facts { font-size: 14px; }
+.path { font: 12.5px/1.5 Consolas, "Cascadia Mono", monospace; overflow-wrap: anywhere; }
+.toasts { position: fixed; right: 20px; bottom: 20px; display: grid; gap: 8px; z-index: 10; max-width: min(380px, calc(100vw - 40px)); }
+.toast { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 8px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); font-size: 14px; }
+.toast.ok .ico { color: var(--foam-ink); } .toast.bad .ico { color: var(--storm-ink); }
+@media (prefers-reduced-motion: no-preference) { .toast { animation: toast .35s cubic-bezier(.16, 1, .3, 1); } }
+@keyframes toast { from { opacity: 0; transform: translateY(8px); } }
+.skeleton { color: transparent !important; background: linear-gradient(90deg, var(--line-2), var(--panel-2), var(--line-2)); background-size: 200% 100%; border-radius: 4px; animation: shimmer 1.4s linear infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+.load-error { padding: 14px 18px; border-radius: var(--r); background: var(--storm-bg); color: var(--storm-ink); border: 1px solid var(--storm); font-weight: 600; }
+
+.tabbar { display: none; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 980px) {
+  .ov-top, .ov-low, .settings-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: sticky; top: 0; z-index: 5; height: auto; flex-direction: row; align-items: center; padding: 10px 16px; gap: 12px; }
+  .brand { padding: 0; }
+  .brand svg { width: 26px; height: 26px; }
+  .rail .nav { display: none; }
+  .pennant { margin: 0 0 0 auto; border: 0; padding: 0; }
+  .pennant small { display: none; }
+  .main { padding: 18px 16px 96px; gap: 18px; }
+  .pagehead h1 { font-size: 22px; }
+  /* one compact row: secondary actions become icon buttons, the primary keeps its label */
+  .actions { margin-left: 0; width: 100%; flex-wrap: nowrap; }
+  .actions .btn { padding: 10px 12px; justify-content: center; }
+  .actions .btn:not(.primary) .lbl { display: none; }
+  .actions .btn.primary { margin-left: auto; flex: 1; }
+  .actions .btn:only-child .lbl { display: inline; }
+  .actions .btn:only-child { flex: 1; }
+  .tabbar { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--rail); border-top: 1px solid var(--rail-line); padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); }
+  .tabbar button { border: 0; background: none; color: var(--rail-ink-2); display: grid; justify-items: center; gap: 3px; padding: 6px 2px; font-size: 11.5px; font-weight: 600; border-radius: 6px; }
+  .tabbar button[aria-current="page"] { color: var(--rail-ink); background: var(--rail-2); }
+  .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tide-figure .big { font-size: 42px; }
+  .tide-figure .note { display: none; }
+  .history .lbl { font-size: 10px; }
+  .search { max-width: none; flex-basis: 100%; }
+  .result-count { margin-left: 0; }
+  /* table becomes stacked rows */
+  table, tbody, tr, td { display: block; }
+  thead { display: none; }
+  tbody tr.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; padding: 14px 16px; border-bottom: 1px solid var(--line-2); }
+  tbody td { padding: 0; border: 0; }
+  tbody td.c-name { grid-column: 1; }
+  tbody td.c-status { grid-column: 2; grid-row: 1; align-self: start; }
+  tbody td.c-meta { grid-column: 1 / -1; color: var(--ink-3); font-size: 13px; }
+  tbody td.c-hide { display: none; }
+  .m-only { display: inline; }
+  .sol-sub { max-width: 100%; }
+  .tl { padding: 0 16px; }
+  .tl li { grid-template-columns: 46px 16px minmax(0, 1fr); }
+  .tl .tags { grid-column: 3; justify-content: flex-start; }
+  dialog.drawer { margin: auto 0 0; height: auto; max-height: 88vh; width: 100vw; border-radius: 14px 14px 0 0; border-width: 1px 0 0; }
+  .toasts { right: 12px; left: 12px; bottom: 84px; max-width: none; }
+}
 </style>
 </head>
 <body>
-<header>
-  <h1>SolutionSync</h1>
-  <nav>
-    <button data-tab="overview" aria-current="page">Dashboard</button>
-    <button data-tab="solutions">Solutions</button>
-    <button data-tab="activity">Activity</button>
-    <button data-tab="settings">Settings</button>
-  </nav>
-</header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-tide" viewBox="0 0 24 24"><path d="M3 15c2 0 2.5-2 4.5-2s2.5 2 4.5 2 2.5-2 4.5-2 2.5 2 4.5 2"/><path d="M3 19c2 0 2.5-2 4.5-2s2.5 2 4.5 2 2.5-2 4.5-2 2.5 2 4.5 2"/><path d="M12 3v8M9 6l3-3 3 3"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></symbol>
+  <symbol id="i-log" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M7 12h10"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4.5L20 16"/><path d="M20 20v-4h-4"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m9 9 6 6M15 9l-6 6"/></symbol>
+  <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+</svg>
 
-<main>
-  <div id="load-error" class="banner bad" hidden></div>
+<div class="app">
+  <aside class="rail">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#164a5b"/><path d="M6 21c2.5 0 3-2.5 5-2.5s2.5 2.5 5 2.5 2.5-2.5 5-2.5 2.5 2.5 5 2.5" fill="none" stroke="#4fc1a8" stroke-width="2.2" stroke-linecap="round"/><path d="M16 6v9M12.5 9.5 16 6l3.5 3.5" fill="none" stroke="#e2efea" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="brand-name">Solution<span>Sync</span></span>
+    </div>
+    <nav class="nav" aria-label="Main">
+      <button data-view="overview" aria-current="page"><svg class="ico"><use href="#i-tide"/></svg>Overview</button>
+      <button data-view="solutions"><svg class="ico"><use href="#i-list"/></svg>Solutions<span class="count num" id="nav-sol-count"></span></button>
+      <button data-view="activity"><svg class="ico"><use href="#i-log"/></svg>Activity logs</button>
+      <button data-view="settings"><svg class="ico"><use href="#i-sliders"/></svg>Settings</button>
+    </nav>
+    <div class="pennant state-off" id="pennant" role="status">
+      <div class="pennant-row"><span class="flag"></span><span id="pennant-label">Loading…</span></div>
+      <small id="pennant-sub"></small>
+    </div>
+  </aside>
 
-  <section id="tab-overview">
-    <div class="cards" id="cards"><div class="card"><div class="label">Loading…</div></div></div>
-    <div class="controls">
-      <button class="btn" data-job="scan">Scan Solutions</button>
-      <button class="btn" data-job="refresh">Refresh GitHub Status</button>
-      <button class="btn primary" data-job="sync">Run Sync</button>
-      <button class="btn" id="pause-btn">Pause Automation</button>
-      <button class="btn" id="resume-btn">Resume Automation</button>
-      <button class="btn" data-goto="activity">View Logs</button>
-      <button class="btn" data-goto="settings">Settings</button>
-    </div>
-    <div id="job" class="banner" hidden></div>
-    <h2>Automation</h2>
-    <div class="cards" id="auto-cards"></div>
-  </section>
+  <main class="main">
+    <header class="pagehead">
+      <div><h1 id="page-title">Overview</h1><p id="page-context">Loading the latest checks…</p></div>
+      <div class="actions" id="page-actions"></div>
+    </header>
+    <div class="load-error" id="load-error" role="alert" hidden></div>
+    <div class="run" id="run" hidden></div>
 
-  <section id="tab-solutions" hidden>
-    <div class="filters">
-      <select id="f-platform" aria-label="Platform">
-        <option value="">All platforms</option><option value="hackerrank">HackerRank</option><option value="exercism">Exercism</option>
-      </select>
-      <select id="f-status" aria-label="GitHub status">
-        <option value="">All statuses</option><option>Published</option><option>Missing</option>
-        <option>Pending</option><option>Failed</option><option>Unable to Verify</option>
-      </select>
-      <input type="search" id="f-search" placeholder="Search by solution name" aria-label="Search">
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Platform</th><th>Solution</th><th>Language</th><th>Local status</th>
-          <th>GitHub status</th><th>Repository</th><th>Last checked</th><th>Actions</th></tr></thead>
-        <tbody id="sol-body"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody>
-      </table>
-    </div>
-    <p class="muted" id="sol-count"></p>
-  </section>
-
-  <section id="tab-activity" hidden>
-    <div class="filters">
-      <select id="e-platform" aria-label="Platform">
-        <option value="">All platforms</option><option value="hackerrank">HackerRank</option><option value="exercism">Exercism</option><option value="-">General</option>
-      </select>
-      <select id="e-op" aria-label="Operation">
-        <option value="">All operations</option><option>scan</option><option>sync</option><option>upload</option>
-        <option>settings</option><option>automation</option>
-      </select>
-      <select id="e-status" aria-label="Status">
-        <option value="">All results</option><option>success</option><option>info</option><option>warning</option><option>error</option>
-      </select>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Time (Manila)</th><th>Platform</th><th>Operation</th><th>Result</th><th>Message</th></tr></thead>
-        <tbody id="ev-body"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="tab-settings" hidden>
-    <div class="settings">
-      <label for="limit-input">Daily Upload Limit</label>
-      <p class="muted" style="margin:0 0 8px">New solution files per Philippine day, HackerRank and Exercism combined.
-        <strong>0</strong> stops all new uploads.</p>
-      <div class="row">
-        <input id="limit-input" type="number" min="0" step="1" inputmode="numeric">
-        <button class="btn primary" id="save-btn">Save Settings</button>
-        <button class="btn" id="cancel-btn">Cancel</button>
+    <!-- overview -->
+    <section data-section="overview" aria-labelledby="page-title">
+      <div style="display:grid;gap:22px">
+        <div class="bulletin" id="bulletin"><span class="flag"></span><div><h2 class="skeleton">Checking conditions</h2><p class="skeleton">Reading the latest scan</p></div></div>
+        <div class="ov-top">
+          <section class="panel" aria-labelledby="tide-h">
+            <div class="panel-head"><h2 id="tide-h">Today's tide</h2><span class="meta" id="tide-meta"></span></div>
+            <div class="tide-figure"><span class="big num" id="tide-big">–</span><span class="of num" id="tide-of"></span><span class="note" id="tide-note"></span></div>
+            <div class="tide-chart" id="tide-chart"></div>
+          </section>
+          <section class="panel stations" aria-labelledby="st-h">
+            <div class="panel-head"><h2 id="st-h">Repositories</h2><span class="meta">GitHub verification</span></div>
+            <div id="stations"><div class="panel-body muted">Loading…</div></div>
+          </section>
+        </div>
+        <dl class="figures" id="figures"></dl>
+        <div class="ov-low">
+          <section class="panel" aria-labelledby="hist-h">
+            <div class="panel-head"><h2 id="hist-h">Last 14 days</h2><span class="meta num" id="hist-meta"></span></div>
+            <div class="panel-body"><div class="history" id="history"></div></div>
+          </section>
+          <section class="panel" aria-labelledby="feed-h">
+            <div class="panel-head"><h2 id="feed-h">Recent activity</h2><button class="btn quiet meta" data-goto="activity">View all</button></div>
+            <div class="panel-body"><ul class="feed" id="feed"></ul></div>
+          </section>
+        </div>
       </div>
-      <div class="error-text" id="limit-error" role="alert"></div>
-      <dl class="facts" id="settings-facts"></dl>
-    </div>
-  </section>
-</main>
+    </section>
 
-<dialog id="confirm">
-  <h3 id="confirm-title"></h3>
-  <p id="confirm-text"></p>
-  <div class="actions"><button class="btn" value="no" id="confirm-no">Cancel</button>
-    <button class="btn primary" value="yes" id="confirm-yes">Continue</button></div>
+    <!-- solutions -->
+    <section data-section="solutions" hidden>
+      <div style="display:grid;gap:14px">
+        <div class="toolbar">
+          <label class="search"><span class="sr">Search solutions</span><svg class="ico"><use href="#i-search"/></svg><input type="search" id="f-search" placeholder="Search by solution name" autocomplete="off"></label>
+          <div class="segmented" role="group" aria-label="Platform" id="f-platform">
+            <button aria-pressed="true" data-v="">All</button><button aria-pressed="false" data-v="hackerrank">HackerRank</button><button aria-pressed="false" data-v="exercism">Exercism</button>
+          </div>
+          <label><span class="sr">GitHub status</span><select id="f-status"></select></label>
+          <span class="result-count num" id="sol-count"></span>
+        </div>
+        <div class="table-shell">
+          <table>
+            <thead><tr><th>Solution</th><th>Platform</th><th>Language</th><th>Local copy</th><th>GitHub</th><th>Last checked</th></tr></thead>
+            <tbody id="sol-body"><tr><td colspan="6" class="empty"><strong>Loading solutions</strong>Reading the latest scan…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- activity -->
+    <section data-section="activity" hidden>
+      <div style="display:grid;gap:14px">
+        <div class="toolbar">
+          <label><span class="sr">Platform</span><select id="e-platform"><option value="">All platforms</option><option value="hackerrank">HackerRank</option><option value="exercism">Exercism</option><option value="-">General</option></select></label>
+          <label><span class="sr">Operation</span><select id="e-op"><option value="">All operations</option><option value="scan">Scans</option><option value="sync">Syncs</option><option value="upload">Uploads</option><option value="settings">Settings</option><option value="automation">Automation</option></select></label>
+          <label><span class="sr">Result</span><select id="e-status"><option value="">All results</option><option value="success">Success</option><option value="info">Info</option><option value="warning">Warnings</option><option value="error">Errors</option></select></label>
+          <span class="result-count num" id="ev-count"></span>
+        </div>
+        <div class="table-shell" id="timeline"><div class="empty"><strong>Loading activity</strong></div></div>
+      </div>
+    </section>
+
+    <!-- settings -->
+    <section data-section="settings" hidden>
+      <div class="settings-grid">
+        <section class="panel" aria-labelledby="lim-h">
+          <div class="panel-head"><h2 id="lim-h">Daily upload limit</h2></div>
+          <div class="panel-body">
+            <label class="field-label" for="limit-input">New solution files per day</label>
+            <p class="help">Shared by HackerRank and Exercism, counted per Philippine calendar day. <b>0</b> stops all new uploads. The scheduled task reads the same saved value.</p>
+            <div class="limit-row">
+              <div class="stepper">
+                <button type="button" id="lim-dec" aria-label="Decrease limit"><svg class="ico"><use href="#i-minus"/></svg></button>
+                <input id="limit-input" type="number" min="0" step="1" inputmode="numeric" aria-describedby="limit-msg slots-note">
+                <button type="button" id="lim-inc" aria-label="Increase limit"><svg class="ico"><use href="#i-plus"/></svg></button>
+              </div>
+              <button class="btn primary" id="save-btn">Save settings</button>
+              <button class="btn" id="cancel-btn">Cancel</button>
+            </div>
+            <div class="field-msg" id="limit-msg" role="alert"></div>
+            <div class="slots" id="slots" aria-hidden="true"></div>
+            <div class="slots-note" id="slots-note"></div>
+          </div>
+        </section>
+        <div style="display:grid;gap:22px">
+          <section class="panel" aria-labelledby="today-h">
+            <div class="panel-head"><h2 id="today-h">Today</h2></div>
+            <div class="panel-body"><dl class="facts" id="settings-facts"></dl></div>
+          </section>
+          <section class="panel" aria-labelledby="auto-h">
+            <div class="panel-head"><h2 id="auto-h">Automation</h2></div>
+            <div class="panel-body" style="display:grid;gap:14px"><dl class="facts" id="auto-facts"></dl><div id="auto-actions"></div></div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="Main">
+    <button data-view="overview" aria-current="page"><svg class="ico"><use href="#i-tide"/></svg>Overview</button>
+    <button data-view="solutions"><svg class="ico"><use href="#i-list"/></svg>Solutions</button>
+    <button data-view="activity"><svg class="ico"><use href="#i-log"/></svg>Activity</button>
+    <button data-view="settings"><svg class="ico"><use href="#i-sliders"/></svg>Settings</button>
+  </nav>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<dialog id="confirm" aria-labelledby="confirm-title">
+  <div class="dlg"><h3 id="confirm-title"></h3><p id="confirm-text"></p>
+    <div class="dlg-actions"><button class="btn" id="confirm-no">Cancel</button><button class="btn primary" id="confirm-yes">Continue</button></div></div>
 </dialog>
 
-<dialog id="details">
-  <h3 id="d-title"></h3>
-  <dl class="facts" id="d-facts"></dl>
-  <div class="actions"><button class="btn" id="d-close">Close</button></div>
+<dialog id="details" class="drawer" aria-labelledby="d-title">
+  <div class="drawer-head"><div><h3 id="d-title"></h3><p id="d-sub"></p></div>
+    <button class="btn quiet" id="d-close" aria-label="Close details"><svg class="ico"><use href="#i-close"/></svg></button></div>
+  <div class="drawer-body" id="d-body"></div>
 </dialog>
 
 <script>
@@ -187,204 +504,488 @@ const $ = s => document.querySelector(s);
 const API = (path, opts = {}) => fetch(path, { ...opts, headers: { "X-SolSync": "1",
   ...(opts.body ? { "Content-Type": "application/json" } : {}) } })
   .then(async r => ({ status: r.status, data: await r.json().catch(() => ({})) }));
-
-let state = { overview: null, solutions: [], events: [] };
 const PLATFORM = { hackerrank: "HackerRank", exercism: "Exercism" };
+const STATUS_CLASS = { "Published": "published", "Missing": "missing", "Pending": "pending", "Failed": "failed", "Unable to Verify": "unverified" };
+const STATUSES = Object.keys(STATUS_CLASS);
+let state = { overview: null, solutions: [], events: [], view: "overview", platform: "" };
 
-function el(tag, props = {}, ...kids) {            // text only, never innerHTML: titles cannot inject code
+// text-only DOM builder: titles and messages can never inject markup
+function el(tag, props = {}, ...kids) {
   const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(props)) k === "class" ? n.className = v : n[k] = v;
-  for (const k of kids) n.append(k instanceof Node ? k : document.createTextNode(k ?? ""));
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v; else if (k.startsWith("on")) n[k] = v;
+    else if (k === "dataset") Object.assign(n.dataset, v); else n.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null) n.append(k instanceof Node ? k : document.createTextNode(String(k)));
   return n;
 }
-const pill = (text, cls) => el("span", { class: "pill s-" + (cls || text).split(" ")[0] }, text);
-const when = iso => iso ? new Date(iso).toLocaleString("en-PH", { timeZone: "Asia/Manila",
-  dateStyle: "medium", timeStyle: "short" }) : "never";
+const NS = "http://www.w3.org/2000/svg";
+function icon(name, cls = "ico") { const s = document.createElementNS(NS, "svg"); s.setAttribute("class", cls); s.setAttribute("aria-hidden", "true");
+  const u = document.createElementNS(NS, "use"); u.setAttribute("href", "#i-" + name); s.append(u); return s; }
+function svg(tag, attrs = {}, text) { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text != null) n.textContent = text; return n; }
+const chip = (status, label) => el("span", { class: "chip " + (STATUS_CLASS[status] || status) }, label || status);
 
-function confirmBox(title, text, yes = "Continue") {
-  $("#confirm-title").textContent = title; $("#confirm-text").textContent = text;
-  $("#confirm-yes").textContent = yes;
-  return new Promise(res => {
-    const d = $("#confirm");
-    $("#confirm-yes").onclick = () => { d.close(); res(true); };
-    $("#confirm-no").onclick = () => { d.close(); res(false); };
-    d.oncancel = () => res(false);
-    d.showModal();
-  });
+// ---------------------------------------------------------------- Manila time helpers
+const TZ = "Asia/Manila";
+const fmt = (iso, o) => iso ? new Date(iso).toLocaleString("en-PH", { timeZone: TZ, ...o }) : "";
+const timeOf = iso => fmt(iso, { hour: "2-digit", minute: "2-digit", hour12: false });
+const dayKey = iso => fmt(iso, { year: "numeric", month: "2-digit", day: "2-digit" });
+function when(iso) {
+  if (!iso) return "never";
+  const d = dayKey(iso), today = dayKey(new Date().toISOString());
+  const y = dayKey(new Date(Date.now() - 864e5).toISOString());
+  const t = fmt(iso, { hour: "numeric", minute: "2-digit" });
+  return d === today ? `today ${t}` : d === y ? `yesterday ${t}` : fmt(iso, { month: "short", day: "numeric" }) + " " + t;
+}
+function manilaMinutes(iso) {
+  const p = new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "numeric", hourCycle: "h23" }).formatToParts(new Date(iso));
+  return +p.find(x => x.type === "hour").value * 60 + +p.find(x => x.type === "minute").value;
+}
+function until(iso) {
+  const m = Math.max(0, Math.round((new Date(iso) - Date.now()) / 60000));
+  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
 }
 
-// ---------------------------------------------------------------- tabs
-document.querySelectorAll("nav button, [data-goto]").forEach(b => b.onclick = () => show(b.dataset.tab || b.dataset.goto));
-function show(tab) {
-  document.querySelectorAll("main > section").forEach(s => s.hidden = s.id !== "tab-" + tab);
-  document.querySelectorAll("nav button").forEach(b => b.toggleAttribute("aria-current", b.dataset.tab === tab));
-  if (tab === "solutions") loadSolutions();
-  if (tab === "activity") loadEvents();
-  if (tab === "settings") fillSettings(true);
+// ---------------------------------------------------------------- dialogs & toasts
+function confirmBox(title, text, yes = "Continue") {
+  $("#confirm-title").textContent = title; $("#confirm-text").textContent = text; $("#confirm-yes").textContent = yes;
+  return new Promise(res => {
+    const d = $("#confirm"), done = v => { d.close(); res(v); };
+    $("#confirm-yes").onclick = () => done(true); $("#confirm-no").onclick = () => done(false);
+    d.oncancel = e => { e.preventDefault(); done(false); };
+    d.showModal(); $("#confirm-no").focus();
+  });
+}
+function toast(text, ok = true) {
+  const t = el("div", { class: "toast " + (ok ? "ok" : "bad"), role: ok ? "status" : "alert" }, icon(ok ? "check" : "x"), el("div", {}, text));
+  $("#toasts").append(t); setTimeout(() => t.remove(), ok ? 4500 : 9000);
+}
+
+// ---------------------------------------------------------------- navigation
+const TITLES = { overview: "Overview", solutions: "Solutions", activity: "Activity logs", settings: "Settings" };
+document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => show(b.dataset.view));
+document.querySelectorAll("[data-goto]").forEach(b => b.onclick = () => show(b.dataset.goto));
+function show(view) {
+  state.view = view;
+  document.querySelectorAll("[data-section]").forEach(s => s.hidden = s.dataset.section !== view);
+  document.querySelectorAll("[data-view]").forEach(b => b.dataset.view === view ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current"));
+  $("#page-title").textContent = TITLES[view];
+  renderHeader();
+  if (view === "activity") loadEvents();
+  if (view === "settings") fillSettings(true);
+  window.scrollTo({ top: 0 });
+}
+
+// ---------------------------------------------------------------- data loading
+async function loadAll() {
+  const [o, s] = await Promise.all([API("/api/overview"), API("/api/solutions")])
+    .catch(e => [{ status: 0, data: { error: String(e) } }, { status: 0, data: [] }]);
+  const err = $("#load-error");
+  if (o.status !== 200) { err.hidden = false; err.textContent = "Cannot load data: " + (o.data.error || "the dashboard server is not reachable. Is py -m solsync dashboard still running?"); return; }
+  err.hidden = true;
+  state.overview = o.data;
+  if (s.status === 200) state.solutions = s.data;
+  renderAll();
+}
+function renderAll() {
+  renderPennant(); renderHeader(); renderRun();
+  renderBulletin(); renderTide(); renderStations(); renderFigures(); renderHistory(); renderFeed();
+  renderSolutions(); fillSettings(false); renderAutomation();
+  $("#nav-sol-count").textContent = state.solutions.length || "";
+}
+
+// ---------------------------------------------------------------- shell pieces
+function automationState() {
+  const o = state.overview, a = o.automation, t = a.task || {};
+  if (a.running || o.job?.state === "running") {
+    const scanning = a.running ? a.running.mode !== "live" : o.job.kind !== "sync";
+    return { cls: "syncing", label: scanning ? "Scanning now" : "Syncing now",
+      sub: a.running ? `${scanning ? "checking GitHub" : "uploading"} since ${timeOf(a.running.started)}` : "started from the dashboard" };
+  }
+  if (t.configured === false) return { cls: "off", label: "Not scheduled", sub: "No daily task is installed" };
+  if (t.state === "Disabled") return { cls: "paused", label: "Automation paused", sub: "Scheduled runs are off" };
+  if (!t.configured) return { cls: "off", label: "Status unknown", sub: t.error || "Task Scheduler did not answer" };
+  return { cls: "active", label: "Automation active", sub: t.next ? `Next run ${when(t.next)}` : "Runs daily and at sign-in" };
+}
+function renderPennant() {
+  const s = automationState();
+  $("#pennant").className = "pennant state-" + s.cls;
+  $("#pennant-label").textContent = s.label; $("#pennant-sub").textContent = s.sub;
+}
+function busy() { const o = state.overview; return !!(o && (o.job?.state === "running" || o.automation.running)); }
+function renderHeader() {
+  const o = state.overview, box = $("#page-actions"); box.replaceChildren();
+  const ctx = $("#page-context");
+  if (!o) return;
+  const q = o.quota;
+  if (state.view === "overview") {
+    ctx.textContent = `Manila day ${fmt(new Date().toISOString(), { weekday: "short", month: "short", day: "numeric" })} · last scan ${when(o.last_scan)}`;
+    const t = o.automation.task || {};
+    box.append(
+      jobBtn("scan", "Scan solutions", "scan"), jobBtn("refresh", "Refresh GitHub status", "refresh"),
+      t.configured ? el("button", { class: "btn", "aria-label": t.state === "Disabled" ? "Resume automation" : "Pause automation", title: t.state === "Disabled" ? "Resume automation" : "Pause automation",
+        onclick: () => toggleAutomation(t.state === "Disabled" ? "resume" : "pause") },
+        icon(t.state === "Disabled" ? "play" : "pause"), el("span", { class: "lbl" }, t.state === "Disabled" ? "Resume automation" : "Pause automation")) : null,
+      jobBtn("sync", "Run sync", "upload", true));
+  } else if (state.view === "solutions") {
+    ctx.textContent = `${state.solutions.length} discovered across HackerRank and Exercism · checked ${when(o.last_scan)}`;
+    box.append(jobBtn("refresh", "Refresh GitHub status", "refresh"));
+  } else if (state.view === "activity") {
+    ctx.textContent = "Scans, uploads, limit changes and automation events, in Philippine time";
+  } else {
+    ctx.textContent = `Limit ${q.limit} per day · ${q.used_today} used today · resets at midnight Manila time`;
+  }
+}
+function jobBtn(kind, label, ico, primary) {
+  return el("button", { class: "btn" + (primary ? " primary" : ""), "aria-label": label, title: label, onclick: () => startJob(kind), ...(busy() ? { disabled: "" } : {}) },
+    icon(ico), el("span", { class: "lbl" }, label));
+}
+
+// ---------------------------------------------------------------- jobs
+const JOB_LABEL = { scan: "Scan", refresh: "GitHub status refresh", sync: "Sync" };
+async function startJob(kind) {
+  const o = state.overview, q = o.quota;
+  if (kind === "sync") {
+    const text = !o.automation.uploads_enabled ? "Uploads are turned off in config.json, so this runs as a dry run and uploads nothing."
+      : q.remaining === 0 ? `Today's limit (${q.limit}) is already used, so nothing will be uploaded until midnight Manila time.`
+      : `This may commit and push up to ${q.remaining} new solution file${q.remaining === 1 ? "" : "s"} to your GitHub repositories, after checking each one is missing. Existing files are never changed.`;
+    if (!await confirmBox("Run sync now?", text, "Run sync")) return;
+  }
+  const r = await API("/api/jobs", { method: "POST", body: JSON.stringify({ kind }) });
+  if (r.status !== 202) toast(r.data.message || "Could not start the job.", false);
+  await loadAll(); schedule();
+}
+let lastJobShown = null;
+function renderRun() {
+  const job = state.overview.job, box = $("#run");
+  if (!job || (job.state === "finished" && lastJobShown === "dismissed:" + job.finished)) { box.hidden = true; return; }
+  box.hidden = false;
+  if (job.state === "running") {
+    box.className = "run";
+    box.replaceChildren(el("div", { class: "run-main" }, icon("refresh"), el("strong", {}, `${JOB_LABEL[job.kind]} running`),
+      el("span", { class: "muted" }, `since ${timeOf(job.started)} · usually under two minutes`)), el("div", { class: "progress" }));
+    return;
+  }
+  const c = job.exit_code, cls = c === 0 ? "ok" : (c === 1 || c === 3) ? "warn" : "bad";
+  const text = c === 0 ? "finished successfully" : c === 1 ? "finished, something needs attention" : c === 3 ? "skipped, another run was already active" : "failed";
+  if (lastJobShown !== job.finished && lastJobShown !== null && lastJobShown !== "dismissed:" + job.finished) toast(`${JOB_LABEL[job.kind]} ${text}.`, c === 0 || c === 1 || c === 3);
+  lastJobShown = job.finished;
+  box.className = "run " + cls;
+  box.replaceChildren(
+    el("div", { class: "run-main" }, icon(c === 0 ? "check" : c === 2 || c < 0 ? "x" : "alert"), el("strong", {}, `${JOB_LABEL[job.kind]} ${text}`),
+      el("span", { class: "muted" }, `at ${timeOf(job.finished)}`),
+      el("button", { class: "btn quiet", "aria-label": "Dismiss", title: "Dismiss", onclick: () => { lastJobShown = "dismissed:" + job.finished; box.hidden = true; } }, icon("close"))),
+    el("details", {}, el("summary", {}, "Show engine output"), el("pre", {}, job.output || "(no output)")));
+}
+async function toggleAutomation(action) {
+  const pause = action === "pause";
+  const ok = await confirmBox(pause ? "Pause automation?" : "Resume automation?",
+    pause ? "Scheduled runs (daily at 06:00, and at sign-in or unlock) stop until you resume. Manual runs from here still work."
+          : "Scheduled runs start again: daily at 06:00, and at sign-in or unlock.", pause ? "Pause" : "Resume");
+  if (!ok) return;
+  const r = await API("/api/automation", { method: "POST", body: JSON.stringify({ action }) });
+  toast(r.data.message || (r.data.ok ? "Done." : "Task Scheduler refused the change."), !!r.data.ok);
+  loadAll();
 }
 
 // ---------------------------------------------------------------- overview
-async function loadOverview() {
-  const r = await API("/api/overview").catch(e => ({ status: 0, data: { error: String(e) } }));
-  const err = $("#load-error");
-  if (r.status !== 200) { err.hidden = false; err.textContent = "Cannot load data: " + (r.data.error || "dashboard server not reachable"); return; }
-  err.hidden = true;
-  state.overview = r.data;
-  const o = r.data, q = o.quota, c = o.counts;
-  const card = (label, value, small) => el("div", { class: "card" }, el("div", { class: "label" }, label),
-    el("div", { class: "value" + (small ? " small" : "") }, String(value)));
-  $("#cards").replaceChildren(
-    card("Solutions discovered", o.total), card("Published on GitHub", c["Published"]),
-    card("Missing from GitHub", c["Missing"]), card("Pending upload / verification", c["Pending"]),
-    card("Failed", c["Failed"]), card("Unable to verify", c["Unable to Verify"]),
-    card("Uploaded today", q.uploaded_today + (q.in_progress_today ? ` (+${q.in_progress_today} in progress)` : "")),
-    card("Remaining today", q.remaining), card("Daily upload limit", q.limit),
-    card("Last successful scan", when(o.last_scan), true), card("Automation", o.automation.state, true));
-  const t = o.automation.task || {};
-  $("#auto-cards").replaceChildren(
-    card("Scheduled task", t.configured === false ? "Not configured" : t.configured ? (t.state || "?") : "Unknown", true),
-    card("Next scheduled run", t.next ? when(t.next) : (t.state === "Disabled" ? "Paused" : "Unknown"), true),
-    card("Last scheduled run", t.last ? when(t.last) : "never", true),
-    card("Running now", o.automation.running ? `Yes (${o.automation.running.mode}, since ${when(o.automation.running.started)})` : "No", true),
-    card("Uploads enabled in config", o.automation.uploads_enabled ? "Yes" : "No (runs are dry runs)", true),
-    card("Last upload", when(o.last_upload), true),
-    ...Object.entries(o.checks).map(([p, ch]) => card(`${PLATFORM[p]} GitHub check`,
-      !ch ? "Not checked yet" : ch.repo_ok ? `OK (${when(ch.time)})` : `Failed: ${ch.problems.join("; ")}`, true)));
-  $("#pause-btn").disabled = !t.configured || t.state === "Disabled";
-  $("#resume-btn").disabled = !t.configured || t.state !== "Disabled";
-  showJob(o.job);
-  fillSettings(false);
+function conditions() {
+  const o = state.overview, c = o.counts, checks = Object.entries(o.checks), t = o.automation.task || {};
+  const failedChecks = checks.filter(([, ch]) => ch && !ch.repo_ok);
+  const access = checks.filter(([, ch]) => ch && !String(ch.access || "").startsWith("ok"));
+  if (c.Failed > 0 || failedChecks.length)
+    return { cls: "storm", title: failedChecks.length ? "Storm warning · GitHub check failed" : `Storm warning · ${c.Failed} failed operation${c.Failed === 1 ? "" : "s"}`,
+      detail: failedChecks.map(([p, ch]) => `${PLATFORM[p]}: ${ch.problems.join("; ")}`).join(" · ") || "Open Solutions and filter by Failed to see the errors." };
+  const notes = [];
+  if (!checks.length || checks.some(([, ch]) => !ch)) notes.push("not every repository has been checked yet; run a scan");
+  if (c["Unable to Verify"] > 0) notes.push(`${c["Unable to Verify"]} could not be verified`);
+  access.forEach(([p, ch]) => notes.push(`${PLATFORM[p]}: ${ch.access}`));
+  if (t.state === "Disabled") notes.push("automation is paused");
+  if (t.configured === false) notes.push("no scheduled task is installed");
+  if (!o.automation.uploads_enabled) notes.push("uploads are turned off in config.json");
+  if (notes.length) return { cls: "caution", title: "Caution · needs a look", detail: notes.join(" · ") };
+  const ch = checks.map(([, x]) => x.time).sort().pop();
+  return { cls: "fair", title: "Fair conditions · everything checked out",
+    detail: `Both repositories verified on GitHub ${when(ch)} · nothing failed · ${o.quota.remaining} upload${o.quota.remaining === 1 ? "" : "s"} left today` };
 }
-
-function showJob(job) {
-  const box = $("#job"), running = job && job.state === "running";
-  document.querySelectorAll("[data-job]").forEach(b => b.disabled = running || !!state.overview?.automation.running);
-  if (!job) { box.hidden = true; return; }
-  box.hidden = false;
-  if (running) { box.className = "banner"; box.textContent = `${labelFor(job.kind)} running since ${when(job.started)}… this can take a couple of minutes.`; return; }
-  const ok = job.exit_code === 0, locked = job.exit_code === 3;
-  box.className = "banner " + (ok ? "ok" : locked ? "warn" : "bad");
-  box.replaceChildren(el("strong", {}, `${labelFor(job.kind)} finished: ` + (ok ? "success" :
-    job.exit_code === 1 ? "partly done (something needs attention)" : locked ? "skipped, another run was already active" : "failed")),
-    el("pre", {}, job.output || ""));
+function renderBulletin() {
+  const b = conditions(), box = $("#bulletin");
+  box.className = "bulletin " + b.cls; box.setAttribute("role", b.cls === "fair" ? "status" : "alert");
+  box.replaceChildren(el("span", { class: "flag" }), el("div", {}, el("h2", {}, b.title), el("p", {}, b.detail)));
 }
-const labelFor = k => ({ scan: "Scan", refresh: "GitHub status refresh", sync: "Sync" })[k] || k;
-
-document.querySelectorAll("[data-job]").forEach(b => b.onclick = async () => {
-  const kind = b.dataset.job, q = state.overview?.quota;
-  if (kind === "sync") {
-    const enabled = state.overview?.automation.uploads_enabled;
-    const text = !enabled ? "Uploads are turned off in config.json, so this runs as a dry run and uploads nothing."
-      : q.remaining === 0 ? `Today's limit (${q.limit}) is already used, so nothing will be uploaded.`
-      : `This may commit and push up to ${q.remaining} new solution file(s) to your GitHub repositories today, `
-        + "after checking that each one is missing from GitHub. Existing files are never changed.";
-    if (!await confirmBox("Run Sync?", text, "Run Sync")) return;
+let tideDrawn = false;
+function renderTide() {
+  const o = state.overview, q = o.quota, ups = o.today_uploads;
+  const done = ups.length;
+  $("#tide-big").textContent = done; $("#tide-of").textContent = `/ ${q.limit} file${q.limit === 1 ? "" : "s"}`;
+  $("#tide-meta").textContent = fmt(new Date().toISOString(), { month: "short", day: "numeric" }) + " · Manila";
+  $("#tide-note").textContent = q.limit === 0 ? "Uploads paused: limit is 0"
+    : q.remaining === 0 ? `Full · next tide in ${until(q.next_reset)}` : `${q.remaining} more possible today`;
+  // drawn at the panel's real width so labels keep their size on phones
+  const W = Math.max(300, $("#tide-chart").clientWidth - 24), H = W < 500 ? 190 : 210, top = 26, bot = 30, left = 8, right = 8, plotH = H - top - bot;
+  const narrow = W < 500;
+  const max = Math.max(q.limit, done, 1);
+  const x = m => left + (m / 1440) * (W - left - right), y = n => top + plotH - (n / max) * plotH;
+  const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${done} of ${q.limit} uploads done today${done ? ", last at " + timeOf(ups[done - 1].ts) : ""}` });
+  for (const h of [0, 6, 12, 18, 24]) {
+    s.append(svg("line", { class: h === 6 ? "tide-sched" : "tide-axis", x1: x(h * 60), x2: x(h * 60), y1: top - 6, y2: H - bot }));
+    s.append(svg("text", { class: "tide-tick", x: x(h * 60), y: H - 10, "text-anchor": h === 0 ? "start" : h === 24 ? "end" : "middle" }, h === 6 && !narrow ? "06:00 run" : String(h).padStart(2, "0") + (narrow ? "" : ":00")));
   }
-  document.querySelectorAll("[data-job]").forEach(x => x.disabled = true);
-  const r = await API("/api/jobs", { method: "POST", body: JSON.stringify({ kind }) });
-  if (r.status !== 202) alert(r.data.message || "Could not start");
-  loadOverview(); poll();
-});
-
-for (const [id, action] of [["#pause-btn", "pause"], ["#resume-btn", "resume"]]) $(id).onclick = async () => {
-  const text = action === "pause" ? "Scheduled runs (daily and at sign-in/unlock) will stop until you resume. Manual runs still work."
-    : "Scheduled runs will start again.";
-  if (!await confirmBox(action === "pause" ? "Pause automation?" : "Resume automation?", text)) return;
-  const r = await API("/api/automation", { method: "POST", body: JSON.stringify({ action }) });
-  if (!r.data.ok) alert(r.data.message);
-  loadOverview();
-};
-
-let pollTimer;
-function poll() {
-  clearTimeout(pollTimer);
-  const busy = state.overview?.job?.state === "running" || state.overview?.automation.running;
-  pollTimer = setTimeout(async () => { await loadOverview(); if (!$("#tab-solutions").hidden) loadSolutions();
-    if (!$("#tab-activity").hidden) loadEvents(); poll(); }, busy ? 3000 : 20000);
+  s.append(svg("line", { class: "tide-axis", x1: left, x2: W - right, y1: H - bot, y2: H - bot }));
+  if (q.limit > 0) {
+    s.append(svg("line", { class: "tide-limit", x1: left, x2: W - right, y1: y(q.limit), y2: y(q.limit) }));
+    s.append(svg("text", { class: "tide-label", x: W - right, y: y(q.limit) - 7, "text-anchor": "end" }, `limit ${q.limit}`));
+  }
+  const nowM = manilaMinutes(new Date().toISOString());
+  // stepped tide: flat water, then a short swell up at each verified upload
+  // Truth first: the last step lands exactly at the last upload's real time (never after
+  // "now"); uploads in the same minute stack leftward 5px apart instead of drifting forward.
+  const xs = ups.map(u => x(manilaMinutes(u.ts)));
+  for (let i = xs.length - 1; i >= 0; i--) xs[i] = Math.min(xs[i], i === xs.length - 1 ? x(nowM) : xs[i + 1] - 5);
+  let d = `M${x(0)} ${y(0)}`, n = 0;
+  const pts = [];
+  xs.forEach((xi, i) => { d += ` L${xi - 4} ${y(n)} C${xi - 1} ${y(n)} ${xi - 3} ${y(n + 1)} ${xi} ${y(n + 1)}`; n++; pts.push([xi, y(n), ups[i]]); });
+  d += ` L${x(nowM)} ${y(n)}`;
+  const fill = svg("path", { class: "tide-fill", d: d + ` L${x(nowM)} ${y(0)} Z` });
+  const line = svg("path", { class: "tide-line", d, pathLength: "1" });
+  s.append(fill, line);
+  s.append(svg("line", { class: "tide-now", x1: x(nowM), x2: x(nowM), y1: top - 6, y2: H - bot }));
+  s.append(svg("text", { class: "tide-now-label", x: x(nowM), y: top - 10, "text-anchor": nowM > 1300 ? "end" : nowM < 100 ? "start" : "middle" }, "now " + timeOf(new Date().toISOString())));
+  if (pts.length) {   // name the tide event on the chart: when the water rose and by how much
+    const [lx, ly, lu] = pts[pts.length - 1];
+    const label = `${timeOf(lu.ts)} · ${pts.length} uploaded`;
+    const right = lx > W * 0.62;
+    s.append(svg("text", { class: "tide-event", x: right ? lx - 10 : lx + 10, y: Math.min(ly + 18, H - bot - 8), "text-anchor": right ? "end" : "start" }, label));
+  }
+  pts.forEach(([px, py, u], i) => {
+    const c = svg("circle", { class: "tide-mark", cx: px, cy: py, r: 4.5 });
+    c.append(svg("title", {}, `${timeOf(u.ts)} · ${u.item_key.replace(/^[^:]+:/, "")} → ${u.file_path}`));
+    s.append(c);
+  });
+  $("#tide-chart").replaceChildren(s);
+  // The one authored moment: the tide draws in once. The chart is complete by default;
+  // the animation only plays when the page is on screen and motion is allowed.
+  if (!tideDrawn && document.visibilityState === "visible" && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const ease = "cubic-bezier(.16, 1, .3, 1)";
+    line.animate([{ strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDasharray: 1, strokeDashoffset: 0 }], { duration: 1100, easing: ease });
+    fill.animate([{ opacity: 0 }, { opacity: .16 }], { duration: 900, delay: 250, easing: ease, fill: "backwards" });
+    s.querySelectorAll(".tide-mark").forEach((m, i) => m.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: 500 + i * 80, easing: ease, fill: "backwards" }));
+  }
+  tideDrawn = true;
+}
+function platformCounts(p) {
+  const rows = state.solutions.filter(r => r.platform === p), c = {};
+  STATUSES.forEach(s => c[s] = rows.filter(r => r.github_status === s).length);
+  return { total: rows.length, ...c };
+}
+function renderStations() {
+  const o = state.overview, box = $("#stations");
+  const plats = Object.keys(o.checks);
+  box.replaceChildren(...plats.map(p => {
+    const ch = o.checks[p], c = platformCounts(p);
+    const repo = state.solutions.find(r => r.platform === p)?.repository || "";
+    const st = !ch ? chip("unverified", "Not checked yet") : ch.repo_ok ? chip("Published", "GitHub OK") : chip("Failed", "Check failed");
+    const seg = el("div", { class: "seg", role: "img", "aria-label": `${c.Published} published, ${c.Missing} missing, ${c.Failed} failed, ${c["Unable to Verify"]} unverified of ${c.total}` },
+      ...[["s-pub", c.Published], ["s-pend", c.Pending], ["s-miss", c.Missing], ["s-fail", c.Failed], ["s-unv", c["Unable to Verify"]]]
+        .filter(([, v]) => v).map(([k, v]) => el("i", { class: k, style: `width:${(v / Math.max(c.total, 1)) * 100}%` })));
+    const days = o.quota.limit ? Math.ceil(c.Missing / o.quota.limit) : null;
+    return el("div", { class: "station" },
+      el("div", { class: "station-head" }, el("h3", {}, repo ? el("a", { href: repo, target: "_blank", rel: "noopener" }, repo.replace("https://github.com/", "")) : PLATFORM[p]), st),
+      seg,
+      el("div", { class: "station-facts num" }, el("span", {}, el("b", {}, c.Published), " published"), el("span", {}, el("b", {}, c.Missing), " missing"),
+        c.Failed ? el("span", {}, el("b", {}, c.Failed), " failed") : null, c["Unable to Verify"] ? el("span", {}, el("b", {}, c["Unable to Verify"]), " unverified") : null,
+        el("span", {}, "of ", el("b", {}, c.total))),
+      el("div", { class: "station-note" }, ch ? `${accessText(p, ch.access)} · checked ${when(ch.time)}` : "Run a scan to check this repository",
+        days != null && c.Missing ? ` · about ${days} day${days === 1 ? "" : "s"} of uploads left` : ""));
+  }));
+}
+// Engine wording -> the product's own words
+function accessText(p, access) {
+  const a = String(access || "");
+  const m = a.match(/^ok \(export (.+)\)$/);
+  if (m) return `Reading HackerRank export ${m[1]}`;
+  if (a === "ok (token accepted)") return "Exercism account connected";
+  return `${PLATFORM[p]}: ${a}`;
+}
+function evidenceText(e) {
+  return String(e || "").replace(/^Exercism status '(\w+)'/, (_, s) => (s === "published" ? "Published" : "Completed") + " on Exercism")
+    .replace(/,? ?completed_at (\S+)/, (_, d) => `, completed ${fmt(d, { year: "numeric", month: "short", day: "numeric" })}`)
+    .replace(/^full score \(1\.0\) in official export/, "Full score (1.0) in your HackerRank export");
+}
+const arrows = s => String(s).replace(/ -> /g, " → ");
+function renderFigures() {
+  const o = state.overview, c = o.counts, q = o.quota;
+  const days = q.limit ? Math.ceil(c.Missing / q.limit) : null;
+  const quiet = !c.Pending && !c.Failed && !c["Unable to Verify"];
+  const figs = [
+    ["Discovered", state.overview.total, "completed on HackerRank and Exercism"],
+    ["Published", c.Published, `verified on GitHub ${when(o.last_scan)}`],
+    ["Missing", c.Missing, days != null ? `queued · about ${days} day${days === 1 ? "" : "s"} at ${q.limit}/day` : "uploads paused (limit 0)"],
+    ...(quiet ? [["Needs attention", "Nothing", "0 pending · 0 failed · 0 unverified", "calm"]] : [
+      ["Pending", c.Pending, c.Pending ? "uploading or waiting to verify" : "nothing in flight"],
+      ["Failed", c.Failed, c.Failed ? "see Solutions → Failed" : "no errors recorded", c.Failed ? "alert" : ""],
+      ["Unable to verify", c["Unable to Verify"], c["Unable to Verify"] ? "GitHub could not be checked" : "every status confirmed", c["Unable to Verify"] ? "warn" : ""]]),
+  ];
+  $("#figures").replaceChildren(...figs.map(([k, v, p, cls]) => el("div", { class: "fig " + (cls || "") }, el("dt", {}, k), el("dd", {}, el("span", { class: "v num" }, v), el("span", { class: "proof" }, p)))));
+}
+function renderHistory() {
+  const o = state.overview, h = o.history, q = o.quota, box = $("#history");
+  const max = Math.max(q.limit, ...h.map(d => d.verified), 1);
+  const total = h.reduce((a, d) => a + d.verified, 0);
+  $("#hist-meta").textContent = `${total} published · limit ${q.limit}/day`;
+  const today = h[h.length - 1]?.day;
+  box.setAttribute("role", "img");
+  box.setAttribute("aria-label", `Uploads per day for the last 14 days: ${h.map(d => d.verified).join(", ")}`);
+  box.replaceChildren(
+    ...h.map(d => { const dt = new Date(d.day + "T12:00:00+08:00");
+      return el("div", { class: "day" + (d.day === today ? " today" : ""), title: `${fmt(dt.toISOString(), { weekday: "short", month: "short", day: "numeric" })}: ${d.verified} published` },
+        el("div", { class: "bar" + (d.verified ? "" : " zero"), style: `height:${d.verified ? (d.verified / max) * 100 : 3}%` }),
+        el("span", { class: "lbl" }, d.day === today ? "today" : fmt(dt.toISOString(), { weekday: "narrow" }))); }));
+}
+const EV_ICON = { success: "check", warning: "alert", error: "x", info: "dot" };
+function renderFeed() {
+  const ev = state.overview.recent, box = $("#feed");
+  if (!ev.length) { box.replaceChildren(el("li", { class: "empty" }, "No activity yet. Run a scan to start the log.")); return; }
+  box.replaceChildren(...ev.map(e => el("li", {}, el("span", { class: "s-" + e.status }, icon(EV_ICON[e.status] || "dot")),
+    el("time", {}, dayKey(e.ts) === dayKey(new Date().toISOString()) ? timeOf(e.ts) : fmt(e.ts, { month: "short", day: "numeric" })),
+    el("span", { class: "msg" }, arrows(e.message)))));
 }
 
 // ---------------------------------------------------------------- solutions
-async function loadSolutions() {
-  const r = await API("/api/solutions");
-  if (r.status !== 200) return;
-  state.solutions = r.data; renderSolutions();
+const fStatus = $("#f-status");
+function renderStatusOptions() {
+  const cur = fStatus.value;
+  fStatus.replaceChildren(el("option", { value: "" }, `All statuses (${state.solutions.length})`),
+    ...STATUSES.map(s => el("option", { value: s }, `${s} (${state.solutions.filter(r => r.github_status === s).length})`)));
+  fStatus.value = cur;
 }
-["#f-platform", "#f-status", "#f-search"].forEach(s => $(s).oninput = renderSolutions);
+$("#f-search").oninput = renderSolutions; fStatus.oninput = renderSolutions;
+document.querySelectorAll("#f-platform button").forEach(b => b.onclick = () => {
+  state.platform = b.dataset.v;
+  document.querySelectorAll("#f-platform button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderSolutions();
+});
 function renderSolutions() {
-  const p = $("#f-platform").value, st = $("#f-status").value, q = $("#f-search").value.trim().toLowerCase();
-  const rows = state.solutions.filter(s => (!p || s.platform === p) && (!st || s.github_status === st)
-    && (!q || (s.title || "").toLowerCase().includes(q)));
+  renderStatusOptions();
+  const p = state.platform, st = fStatus.value, q = $("#f-search").value.trim().toLowerCase();
+  const rows = state.solutions.filter(s => (!p || s.platform === p) && (!st || s.github_status === st) && (!q || (s.title || "").toLowerCase().includes(q)));
   const body = $("#sol-body");
-  if (!state.solutions.length) { body.replaceChildren(el("tr", {}, el("td", { colSpan: 8, class: "empty" },
-    "No solutions recorded yet. Click Scan Solutions on the Dashboard."))); $("#sol-count").textContent = ""; return; }
-  if (!rows.length) { body.replaceChildren(el("tr", {}, el("td", { colSpan: 8, class: "empty" }, "No solutions match these filters."))); }
-  else body.replaceChildren(...rows.map(s => el("tr", {},
-    el("td", {}, PLATFORM[s.platform]), el("td", {}, s.title), el("td", {}, s.language),
-    el("td", {}, s.local_status), el("td", {}, pill(s.github_status, s.github_status === "Unable to Verify" ? "Unable" : s.github_status)),
-    el("td", {}, s.repository.replace("https://github.com/", "")), el("td", {}, when(s.last_checked)),
-    el("td", {}, el("button", { class: "btn", onclick: () => details(s) }, "Details")))));
-  $("#sol-count").textContent = `Showing ${rows.length} of ${state.solutions.length}`;
+  $("#sol-count").textContent = state.solutions.length ? `${rows.length} of ${state.solutions.length}` : "";
+  if (!state.solutions.length) { body.replaceChildren(el("tr", {}, el("td", { colspan: 6, class: "empty" }, el("strong", {}, "No solutions recorded yet"), "Go to Overview and run Scan solutions."))); return; }
+  if (!rows.length) { body.replaceChildren(el("tr", {}, el("td", { colspan: 6, class: "empty" }, el("strong", {}, "Nothing matches these filters"),
+    el("button", { class: "btn", onclick: clearFilters }, "Clear filters")))); return; }
+  body.replaceChildren(...rows.map(s => {
+    const tr = el("tr", { class: "row", tabindex: "0", "aria-label": `${s.title}, ${PLATFORM[s.platform]}, ${s.github_status}. Open details` },
+      el("td", { class: "c-name" }, el("span", { class: "sol-name" }, s.title),
+        el("span", { class: "sol-sub", title: s.remote_paths[0] || s.note }, s.remote_paths[0] || s.note || "destination decided after download")),
+      el("td", { class: "c-meta" }, el("span", { class: "tag" }, PLATFORM[s.platform]), el("span", { class: "m-only muted" }, ` ${s.language} · checked ${when(s.last_checked)}`)),
+      el("td", { class: "c-hide" }, s.language),
+      el("td", { class: "c-hide" }, s.local_status),
+      el("td", { class: "c-status" }, chip(s.github_status)),
+      el("td", { class: "c-hide num muted" }, when(s.last_checked)));
+    tr.onclick = () => details(s); tr.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); details(s); } };
+    return tr;
+  }));
 }
+function clearFilters() { $("#f-search").value = ""; fStatus.value = ""; document.querySelector('#f-platform [data-v=""]').click(); }
 function details(s) {
-  $("#d-title").textContent = `${PLATFORM[s.platform]}: ${s.title}`;
-  const link = s.github_url ? el("a", { href: s.github_url, target: "_blank", rel: "noopener" }, s.github_url) : "Not verified on GitHub";
-  const rows = [["GitHub status", pill(s.github_status, s.github_status === "Unable to Verify" ? "Unable" : s.github_status)],
-    ["Engine status", s.engine_status], ["Language", s.language], ["Local file", s.local_paths.join("\n") || "—"],
-    ["Local status", s.local_status], ["Repository", s.repository], ["Remote path", s.remote_paths.join("\n") || "—"],
-    ["GitHub link", link], ["Last checked", when(s.last_checked)], ["Completion evidence", s.evidence || "—"],
-    ["Note / last error", s.note || "—"], ["Source", s.source_url || "—"]];
-  $("#d-facts").replaceChildren(...rows.flatMap(([k, v]) => [el("dt", {}, k), el("dd", {}, v)]));
+  $("#d-title").textContent = s.title;
+  $("#d-sub").textContent = `${PLATFORM[s.platform]} · ${s.language}`;
+  const link = s.github_url ? el("a", { class: "btn primary", href: s.github_url, target: "_blank", rel: "noopener" }, icon("ext"), "Open file on GitHub")
+    : el("p", { class: "muted", style: "margin:0" }, s.github_status === "Published" ? "Published, but no single file to link." : "No GitHub link: this file is not verified on GitHub.");
+  const rows = [["GitHub status", chip(s.github_status)], ["Repository", el("a", { href: s.repository, target: "_blank", rel: "noopener" }, s.repository.replace("https://github.com/", ""))],
+    ["Remote path", el("span", { class: "path" }, s.remote_paths.join("\n") || "not decided yet")], ["Local file", el("span", { class: "path" }, s.local_paths.join("\n") || "—")],
+    ["Local copy", s.local_status], ["Last checked", when(s.last_checked)], ["Completion", evidenceText(s.evidence) || "—"],
+    ["Engine note", s.note || "—"], ["Source", s.source_url ? el("a", { href: s.source_url, target: "_blank", rel: "noopener" }, "View on " + PLATFORM[s.platform]) : "—"]];
+  $("#d-body").replaceChildren(link, el("dl", { class: "facts" }, ...rows.flatMap(([k, v]) => [el("dt", {}, k), el("dd", {}, v)])));
   $("#details").showModal();
 }
 $("#d-close").onclick = () => $("#details").close();
+$("#details").onclick = e => { if (e.target === $("#details")) $("#details").close(); };
 
 // ---------------------------------------------------------------- activity
 async function loadEvents() {
   const r = await API("/api/events");
-  if (r.status !== 200) return;
+  if (r.status !== 200) { $("#timeline").replaceChildren(el("div", { class: "empty" }, el("strong", {}, "Could not load activity"), "The dashboard server did not answer.")); return; }
   state.events = r.data; renderEvents();
 }
 ["#e-platform", "#e-op", "#e-status"].forEach(s => $(s).oninput = renderEvents);
 function renderEvents() {
   const p = $("#e-platform").value, op = $("#e-op").value, st = $("#e-status").value;
-  const rows = state.events.filter(e => (!p || (p === "-" ? !e.platform : e.platform === p))
-    && (!op || e.operation === op) && (!st || e.status === st));
-  $("#ev-body").replaceChildren(...(rows.length ? rows.map(e => el("tr", {}, el("td", {}, when(e.ts)),
-    el("td", {}, PLATFORM[e.platform] || "General"), el("td", {}, e.operation), el("td", {}, pill(e.status)),
-    el("td", {}, e.message))) : [el("tr", {}, el("td", { colSpan: 5, class: "empty" }, "No activity yet."))]));
+  const rows = state.events.filter(e => (!p || (p === "-" ? !e.platform : e.platform === p)) && (!op || e.operation === op) && (!st || e.status === st));
+  $("#ev-count").textContent = `${rows.length} event${rows.length === 1 ? "" : "s"}`;
+  const box = $("#timeline");
+  if (!rows.length) { box.replaceChildren(el("div", { class: "empty" }, el("strong", {}, state.events.length ? "No events match these filters" : "No activity yet"), state.events.length ? "" : "Scans, uploads and setting changes will appear here.")); return; }
+  const groups = new Map();
+  for (const e of rows) { const k = dayKey(e.ts); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(e); }
+  const todayK = dayKey(new Date().toISOString()), yK = dayKey(new Date(Date.now() - 864e5).toISOString());
+  box.replaceChildren(...[...groups].flatMap(([k, evs]) => [
+    el("div", { class: "timeline-day" }, k === todayK ? "Today" : k === yK ? "Yesterday" : fmt(evs[0].ts, { weekday: "long", month: "long", day: "numeric" })),
+    el("ul", { class: "tl" }, ...evs.map(e => el("li", {}, el("time", {}, timeOf(e.ts)), el("span", { class: "s-" + e.status, style: `color:var(--${({ success: "foam-ink", warning: "buoy-ink", error: "storm-ink" })[e.status] || "ink-3"})` }, icon(EV_ICON[e.status] || "dot")),
+      el("span", { class: "msg" }, arrows(e.message)), el("span", { class: "tags" }, e.platform ? el("span", { class: "tag" }, PLATFORM[e.platform]) : null, el("span", { class: "tag" }, e.operation)))))]));
 }
 
 // ---------------------------------------------------------------- settings
 let editing = false;
+const input = $("#limit-input");
 function fillSettings(reset) {
-  const q = state.overview?.quota; if (!q) return;
-  if (reset || !editing) { $("#limit-input").value = q.limit; $("#limit-input").max = q.max; $("#limit-error").textContent = ""; editing = false; }
-  const facts = [["Saved limit", q.limit], ["Uploaded today", q.uploaded_today + (q.in_progress_today ? ` (+${q.in_progress_today} in progress)` : "")],
-    ["Remaining today", q.remaining], ["Next reset (Manila)", when(q.next_reset)], ["Safety maximum", q.max]];
-  $("#settings-facts").replaceChildren(...facts.flatMap(([k, v]) => [el("dt", {}, k), el("dd", {}, String(v))]));
+  const o = state.overview; if (!o) return; const q = o.quota;
+  if (reset || !editing) { input.value = q.limit; input.max = q.max; editing = false; if (reset) setMsg(""); }
+  previewSlots(); syncButtons();
+  const facts = [["Saved limit", `${q.limit} per day`], ["Uploaded today", `${q.uploaded_today}` + (q.in_progress_today ? ` (+${q.in_progress_today} in progress)` : "")],
+    ["Remaining today", String(q.remaining)], ["Next reset", `${fmt(q.next_reset, { weekday: "short", hour: "numeric", minute: "2-digit" })} Manila · in ${until(q.next_reset)}`],
+    ["Safety maximum", `${q.max} ("max_daily_limit" in config.json)`]];
+  $("#settings-facts").replaceChildren(...facts.flatMap(([k, v]) => [el("dt", {}, k), el("dd", { class: "num" }, v)]));
 }
-$("#limit-input").oninput = () => { editing = true; $("#limit-error").textContent = ""; };
-$("#cancel-btn").onclick = () => fillSettings(true);
+function previewSlots() {
+  const q = state.overview.quota, raw = input.value.trim(), v = /^\d+$/.test(raw) ? +raw : q.limit;
+  const n = Math.min(Math.max(v, q.used_today), 40);
+  $("#slots").replaceChildren(...Array.from({ length: n }, (_, i) => el("i", { class: i < q.used_today ? (i < v ? "used" : "over") : "" })));
+  $("#slots-note").textContent = v === 0 ? "With 0, no new uploads happen until you raise it." :
+    q.used_today > v ? `${q.used_today} were already uploaded today; nothing is undone, and no more go up until midnight Manila time.` :
+    `With ${v}, ${v - q.used_today} more upload${v - q.used_today === 1 ? "" : "s"} can happen today.`;
+}
+function setMsg(text, kind) { const m = $("#limit-msg"); m.textContent = text; m.className = "field-msg" + (kind ? " " + kind : ""); input.setAttribute("aria-invalid", String(kind === "err")); }
+function syncButtons() {   // Save and Cancel only mean something once the value differs from the saved one
+  const changed = input.value.trim() !== String(state.overview.quota.limit);
+  $("#save-btn").disabled = !changed; $("#cancel-btn").disabled = !changed;
+}
+input.oninput = () => { editing = true; setMsg(""); previewSlots(); syncButtons(); };
+$("#lim-dec").onclick = () => { const v = parseInt(input.value, 10); input.value = Math.max(0, (isNaN(v) ? 0 : v) - 1); input.oninput(); };
+$("#lim-inc").onclick = () => { const v = parseInt(input.value, 10); input.value = Math.min(state.overview.quota.max, (isNaN(v) ? 0 : v) + 1); input.oninput(); };
+$("#cancel-btn").onclick = () => { fillSettings(true); setMsg("Changes discarded; the saved limit is unchanged."); };
 $("#save-btn").onclick = async () => {
-  const raw = $("#limit-input").value.trim(), q = state.overview.quota, err = $("#limit-error");
-  if (!/^\d+$/.test(raw)) { err.textContent = raw.startsWith("-") ? "The limit cannot be negative."
-    : "Enter a whole number (no decimals, letters or spaces)."; return; }
+  const raw = input.value.trim(), q = state.overview.quota;
+  if (!/^\d+$/.test(raw)) return setMsg(raw.startsWith("-") ? "The limit cannot be negative." : "Enter a whole number, with no decimals, letters or spaces.", "err");
   const value = Number(raw);
-  if (value > q.max) { err.textContent = `The limit cannot be more than ${q.max} (safety maximum).`; return; }
+  if (value > q.max) return setMsg(`The limit cannot be more than ${q.max}, the safety maximum.`, "err");
   let confirm = false;
   if (value > q.high_warning) {
-    if (!await confirmBox("Save an unusually high limit?", `${value} new files per day is higher than usual. `
-      + "Your GitHub activity will grow quickly and your queue will empty faster.", "Save anyway")) return;
+    if (!await confirmBox("Save an unusually high limit?", `${value} new files a day is higher than usual. Your queue empties faster and your GitHub activity grows quickly.`, "Save anyway")) return;
     confirm = true;
   }
   const r = await API("/api/settings", { method: "POST", body: JSON.stringify({ daily_limit: value, confirm }) });
-  if (!r.data.ok) { err.textContent = r.data.message || "Saving failed; the previous limit is still in use."; return; }
-  editing = false; err.textContent = "";
-  await loadOverview(); fillSettings(true);
-  err.textContent = ""; $("#settings-facts").prepend(el("dt", {}, "Saved"), el("dd", {}, `Limit is now ${r.data.daily_limit}.`));
+  if (!r.data.ok) { setMsg(r.data.message || "Saving failed; the previous limit is still in use.", "err"); toast("Settings not saved.", false); return; }
+  editing = false; await loadAll(); fillSettings(true); syncButtons();
+  setMsg(`Saved. The limit is now ${r.data.daily_limit} per day, for the dashboard and the scheduled task.`, "ok");
+  toast(`Daily upload limit saved: ${r.data.daily_limit}.`);
 };
+function renderAutomation() {
+  const o = state.overview, t = o.automation.task || {}, s = automationState();
+  $("#auto-facts").replaceChildren(...[["State", s.label], ["Next run", t.next ? when(t.next) : "—"], ["Last run", t.last ? when(t.last) + (t.result != null ? ` · result ${t.result === 0 ? "OK" : t.result}` : "") : "—"],
+    ["Uploads", o.automation.uploads_enabled ? "enabled" : "off (runs are dry runs)"], ["Triggers", "daily 06:00, and 5 min after sign-in or unlock"]]
+    .flatMap(([k, v]) => [el("dt", {}, k), el("dd", {}, v)]));
+  $("#auto-actions").replaceChildren(t.configured ? el("button", { class: "btn", onclick: () => toggleAutomation(t.state === "Disabled" ? "resume" : "pause") },
+    icon(t.state === "Disabled" ? "play" : "pause"), t.state === "Disabled" ? "Resume automation" : "Pause automation")
+    : el("p", { class: "muted", style: "margin:0" }, "Install the daily task with scripts\\install_task.ps1 (see the README)."));
+}
 
-loadOverview().then(poll);
+// ---------------------------------------------------------------- polling
+let timer;
+function schedule() { clearTimeout(timer); timer = setTimeout(async () => { await loadAll(); if (state.view === "activity") loadEvents(); schedule(); }, busy() ? 3000 : 20000); }
+let resizeT;
+window.addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => state.overview && renderTide(), 150); });
+loadAll().then(schedule);
 </script>
 </body>
 </html>
