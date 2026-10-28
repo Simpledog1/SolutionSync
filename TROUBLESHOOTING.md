@@ -4,7 +4,7 @@ Start with these two commands. They show what went wrong without changing anythi
 
 ```powershell
 cd C:\Code\SolutionSync   # wherever you put the SolutionSync folder
-python -m solsync status
+py -m solsync status
 Get-Content logs\solsync.log -Tail 50
 ```
 
@@ -16,7 +16,7 @@ Get-Content logs\solsync.log -Tail 50
   ```powershell
   cmdkey /delete:SolutionSync-Exercism
   cmdkey /generic:SolutionSync-Exercism /user:exercism /pass
-  python -m solsync check
+  py -m solsync check
   ```
 
   After an auth error the tool stops calling Exercism for that run, so a bad token never floods the site with requests.
@@ -27,7 +27,7 @@ Get-Content logs\solsync.log -Tail 50
 - **`export unreadable` / `0 accepted solutions` / `format may differ`:** HackerRank's export layout isn't publicly documented, so the reader looks for records containing code, a challenge name or slug, a language, and the status `Accepted`. Run:
 
   ```powershell
-  python -m solsync inspect-export
+  py -m solsync inspect-export
   ```
 
   This lists only key names, such as `doc0.submissions[].code: str`, never your code. If the keys have different names, add them to the lists at the top of `solsync\hackerrank_source.py` (`CODE_KEYS`, `SLUG_KEYS`, `NAME_KEYS`, `LANG_KEYS`, `STATUS_KEYS`), then run the tests and a dry run.
@@ -49,7 +49,7 @@ git log --oneline --graph --all -15
 ```
 
 Then pull and resolve as you normally would (`git pull`). If an automation commit is involved,
-`python -m solsync status` shows it as an unfinished upload, and the next run continues
+`py -m solsync status` shows it as an unfinished upload, and the next run continues
 once the histories line up again.
 
 ## "repository check failed: ... merge --ff-only failed"
@@ -61,7 +61,7 @@ save your edit, then run `git pull` yourself.
 
 You don't need to do anything. The commit stays in your local repo and the ledger remembers it.
 The next run checks GitHub first (in case the push did go through), then pushes again. On a
-later day it needs a free quota slot before pushing. `python -m solsync status` lists it under
+later day it needs a free quota slot before pushing. `py -m solsync status` lists it under
 "Unfinished upload".
 
 ## `conflict` or `ambiguous_match`
@@ -87,7 +87,7 @@ Read the note:
 Failed downloads are retried with growing waits and at most 5 attempts. To retry immediately:
 
 ```powershell
-python -m solsync reset-item exercism:python/bob
+py -m solsync reset-item exercism:python/bob
 ```
 
 ## The task didn't run

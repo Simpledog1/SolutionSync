@@ -39,7 +39,7 @@ instead of one giant dump. It runs by itself once a day using Windows Task Sched
 | Thing | Notes |
 |---|---|
 | Windows 10 or 11 | |
-| [Python](https://www.python.org/downloads/) 3.10 or newer | Check with `python --version`. Developed and tested with 3.15. |
+| [Python](https://www.python.org/downloads/) 3.10 or newer | Check with `py --version`. Developed and tested with 3.15. |
 | [Git for Windows](https://git-scm.com/download/win) | Includes Git Credential Manager, which remembers your GitHub login. |
 | A GitHub account | |
 | One GitHub repo for HackerRank solutions | For example `HackerRank-Problems`. It can be empty. |
@@ -48,6 +48,13 @@ instead of one giant dump. It runs by itself once a day using Windows Task Sched
 
 All commands below are typed into **PowerShell**. In VS Code: **Terminal → New
 Terminal**; the prompt starts with `PS`.
+
+> **Use `py`, not `python`.** The commands below start with `py`, the Python launcher that
+> comes with Python for Windows. On many PCs, typing `python` instead opens a "Python was not
+> found … Microsoft Store" message even though Python is installed. That's a Windows
+> shortcut getting in the way. `py` always finds your real Python. If you prefer `python`,
+> switch off **App Installer — python.exe** and **python3.exe** under
+> **Settings → Apps → Advanced app settings → App execution aliases**.
 
 ## 2. Install
 
@@ -125,7 +132,7 @@ Open `config.json` in the SolutionSync folder and replace the example values wit
 > **Time zone:** the "day" for the daily limit is counted in Philippine time (UTC+8). To use
 > your own, edit the top of `solsync\config.py`: change `ZoneInfo("Asia/Manila")` to your
 > zone (e.g. `ZoneInfo("America/New_York")`, which on Windows also needs
-> `python -m pip install tzdata`) and change the fallback `timedelta(hours=8)` to your UTC offset.
+> `py -m pip install tzdata`) and change the fallback `timedelta(hours=8)` to your UTC offset.
 
 **Only using one platform?** Still fill in both repos (they are checked), and just skip
 step 4 or step 5. The unused platform is skipped with a message such as `No Exercism token`
@@ -147,7 +154,7 @@ Windows Credential Manager (never in a file or in the code).
 3. Check it:
 
    ```powershell
-   python -m solsync check
+   py -m solsync check
    ```
 
    You should see `[exercism] platform: ok (token accepted)`.
@@ -166,7 +173,7 @@ data. SolutionSync reads that file. Repeat this whenever you have solved new pro
 4. Check that it was understood:
 
    ```powershell
-   python -m solsync inspect-export
+   py -m solsync inspect-export
    ```
 
    This shows only the *structure* of the file (never your code). The last line should say how
@@ -177,7 +184,7 @@ A HackerRank solution counts as completed when it scored **full marks (1.0)**.
 ## 6. Try it safely (dry run)
 
 ```powershell
-python -m solsync run --dry-run
+py -m solsync run --dry-run
 ```
 
 A dry run changes nothing and uses none of the daily limit. It lists every solution it
@@ -203,7 +210,7 @@ Check that the folders and file names look right for your repos before continuin
 **b) Do one run yourself and look at the result on GitHub:**
 
 ```powershell
-python -m solsync run
+py -m solsync run
 ```
 
 **c) Schedule it daily** (default 06:00; choose any time with `-Time`):
@@ -225,7 +232,7 @@ That's it. From now on it uploads up to `daily_limit` files every day.
 ### The dashboard (easiest)
 
 ```powershell
-python -m solsync dashboard
+py -m solsync dashboard
 ```
 
 Your browser opens `http://127.0.0.1:8765`. **To stop it**, press **Ctrl + C** in the
@@ -248,13 +255,13 @@ Run these from the SolutionSync folder. You never *need* to; the daily task does
 
 | What | Command |
 |---|---|
-| Quick summary | `python -m solsync status \| Select-Object -First 4` |
-| Everything waiting / needing attention | `python -m solsync status` |
-| Dry run | `python -m solsync run --dry-run` |
-| Upload now (counts toward today's limit) | `python -m solsync run` |
-| Check repos and logins | `python -m solsync check` |
+| Quick summary | `py -m solsync status \| Select-Object -First 4` |
+| Everything waiting / needing attention | `py -m solsync status` |
+| Dry run | `py -m solsync run --dry-run` |
+| Upload now (counts toward today's limit) | `py -m solsync run` |
+| Check repos and logins | `py -m solsync check` |
 | Recent log | `Get-Content logs\solsync.log -Tail 30` |
-| Retry a failed item now | `python -m solsync reset-item exercism:python/bob` |
+| Retry a failed item now | `py -m solsync reset-item exercism:python/bob` |
 | Pause the daily task | `Disable-ScheduledTask -TaskName "SolutionSync Daily"` |
 | Resume it | `Enable-ScheduledTask -TaskName "SolutionSync Daily"` |
 
@@ -298,7 +305,7 @@ Challenges from other sections or in other languages are not uploaded; they are 
 you to place by hand. If HackerRank adds new challenges, refresh the list with:
 
 ```powershell
-python scripts\build_hackerrank_sections.py
+py scripts\build_hackerrank_sections.py
 ```
 
 **Already have solutions in your repo?** SolutionSync recognises them if the same code is
