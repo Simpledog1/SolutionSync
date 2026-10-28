@@ -12,7 +12,7 @@ Get-Content logs\solsync.log -Tail 50
 
 ## Exercism: "auth problem"
 
-- **`No Exercism token in Windows Credential Manager`:** you haven't stored the token yet. See README → Setup → 1.
+- **`No Exercism token in Windows Credential Manager`:** you haven't stored the token yet. See [README → Configure](README.md#required-for-exercism-store-your-api-token).
 - **`Exercism rejected the token (HTTP 401/403)`:** the token expired or was regenerated. Copy the new one from https://exercism.org/settings/api_cli, then replace the stored copy:
 
   ```powershell
@@ -25,7 +25,7 @@ Get-Content logs\solsync.log -Tail 50
 
 ## HackerRank: export problems
 
-- **`no export file in ...inbox\hackerrank`:** download a new export (README → Setup → 2).
+- **`no export file in ...inbox\hackerrank`:** download a new export ([README → Configure](README.md#required-for-hackerrank-download-your-data-export)).
 - **`export unreadable` / `0 accepted solutions` / `format may differ`:** HackerRank's export layout isn't publicly documented, so the reader looks for records containing code, a challenge name or slug, a language, and the status `Accepted`. Run:
 
   ```powershell
