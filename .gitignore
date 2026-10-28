@@ -22,3 +22,7 @@ Thumbs.db
 *.secret
 .env
 browser-profile/
+# desktop build output (installers are published as GitHub Release assets, not committed)
+build/
+dist/
+.venv-build/

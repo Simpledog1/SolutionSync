@@ -1,0 +1,57 @@
+name: Desktop app
+
+# Builds the Windows desktop app (installer + portable zip) as a workflow artifact:
+# on demand, and on pushes to main that touch the app. Only a version tag (v1.2.3)
+# publishes a GitHub Release with those files.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+    branches: [main]
+    paths: ["solsync/**", "desktop_app.py", "SolutionSync.spec", "installer/**", "assets/**",
+            "scripts/build_desktop.ps1", "requirements-desktop.txt", "config.example.json",
+            ".github/workflows/desktop.yml"]
+
+permissions:
+  contents: write   # needed only by the release step on tags
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Unit tests
+        run: |
+          git config --global user.name "ci"
+          git config --global user.email "ci@example.com"
+          python -m unittest discover -s tests -t .
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+      - name: Build
+        run: powershell -ExecutionPolicy Bypass -File scripts\build_desktop.ps1 -Python python
+      - name: Smoke-test the packaged engine
+        # the windowed exe runs the engine headless; exit code 2 = config problem is expected
+        # here (no config on the runner), anything else non-zero is a real failure
+        shell: pwsh
+        run: |
+          $env:SOLSYNC_HOME = "$env:RUNNER_TEMP\solsync-home"
+          New-Item -ItemType Directory -Force $env:SOLSYNC_HOME | Out-Null
+          $p = Start-Process dist\SolutionSync\SolutionSync.exe -ArgumentList "status" -Wait -PassThru
+          if ($p.ExitCode -ne 2) { throw "unexpected exit code $($p.ExitCode)" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SolutionSync-windows
+          path: |
+            dist/SolutionSync-*-setup.exe
+            dist/SolutionSync-*-win64-portable.zip
+          if-no-files-found: error
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/SolutionSync-*-setup.exe
+            dist/SolutionSync-*-win64-portable.zip

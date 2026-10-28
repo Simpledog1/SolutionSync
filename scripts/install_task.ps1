@@ -1,17 +1,26 @@
 # Registers (or updates) the daily "SolutionSync Daily" task for the current user.
 # Safe to run again: it replaces the existing task instead of creating a duplicate.
 # Usage:  powershell -ExecutionPolicy Bypass -File scripts\install_task.ps1 [-Time 06:00]
-param([string]$Time = "06:00")
+#         ... -Exe "<path>\SolutionSync.exe"   to run the desktop app's engine instead of Python
+param([string]$Time = "06:00", [string]$Exe = "")
 $ErrorActionPreference = "Stop"
 
 $TaskName = "SolutionSync Daily"
 $Root = Split-Path -Parent $PSScriptRoot
 
-# A stable interpreter path (not a temporary terminal setting). pythonw = no console window.
-$Python = & py -3 -c "import sys; print(sys.executable)"
-$PythonW = Join-Path (Split-Path $Python) "pythonw.exe"
-if (Test-Path $PythonW) { $Python = $PythonW }
-if (-not (Test-Path $Python)) { throw "Python was not found." }
+if ($Exe) {
+    # Desktop-app users without Python: the packaged app runs the same engine headless.
+    if (-not (Test-Path $Exe)) { throw "SolutionSync.exe not found at $Exe" }
+    $Exe = (Resolve-Path $Exe).Path
+    $action = New-ScheduledTaskAction -Execute $Exe -Argument "run" -WorkingDirectory (Split-Path $Exe)
+} else {
+    # A stable interpreter path (not a temporary terminal setting). pythonw = no console window.
+    $Python = & py -3 -c "import sys; print(sys.executable)"
+    $PythonW = Join-Path (Split-Path $Python) "pythonw.exe"
+    if (Test-Path $PythonW) { $Python = $PythonW }
+    if (-not (Test-Path $Python)) { throw "Python was not found." }
+    $action = New-ScheduledTaskAction -Execute $Python -Argument "-m solsync run" -WorkingDirectory $Root
+}
 
 # Task Scheduler uses this PC's clock. The app counts quota in Manila time on its own,
 # but the start time only means "Manila time" if the PC is on UTC+08:00.
@@ -20,8 +29,7 @@ if ($tz.BaseUtcOffset -ne [TimeSpan]::FromHours(8) -or $tz.SupportsDaylightSavin
     Write-Warning "PC time zone is $($tz.Id); $Time will be PC time, not Manila time."
 }
 
-$action = New-ScheduledTaskAction -Execute $Python -Argument "-m solsync run" -WorkingDirectory $Root
-$user = "$env:USERDOMAIN\$env:USERNAME"
+$user ="$env:USERDOMAIN\$env:USERNAME"
 # Daily at $Time, plus 5 minutes after you sign in or unlock the PC. The extra starts catch
 # runs missed or cut off by sleep/shutdown; once the day's limit is used they exit at once.
 $daily = New-ScheduledTaskTrigger -Daily -At $Time

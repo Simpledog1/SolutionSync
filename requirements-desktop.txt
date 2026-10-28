@@ -1,0 +1,3 @@
+# Only needed to BUILD the desktop app; the engine and web dashboard use the standard library.
+pyinstaller==6.22.3
+pywebview==6.2.1

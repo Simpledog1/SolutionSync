@@ -1,0 +1,25 @@
+{
+  "daily_limit": 4,
+  "uploads_enabled": false,
+  "max_downloads_per_run": 10,
+  "repos": {
+    "hackerrank": {
+      "path": "C:/Code/HackerRank-Problems",
+      "remote_url": "https://github.com/YOUR-USERNAME/HackerRank-Problems.git",
+      "branch": "main"
+    },
+    "exercism": {
+      "path": "C:/Code/Exercism-Problems",
+      "remote_url": "https://github.com/YOUR-USERNAME/Exercism-Problems.git",
+      "branch": "main",
+      "language_dirs": {"python": "Python", "dart": "Dart"}
+    }
+  },
+  "exercism": {
+    "api_base": "https://api.exercism.org",
+    "credential_target": "SolutionSync-Exercism"
+  },
+  "hackerrank": {
+    "inbox": "inbox/hackerrank"
+  }
+}
