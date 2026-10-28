@@ -1,4 +1,6 @@
-# runtime data (private, machine-specific)
+# your settings and runtime data (private, machine-specific); config.example.json is the template
+config.json
+config.mine.json
 state/
 logs/
 inbox/

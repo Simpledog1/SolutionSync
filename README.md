@@ -48,7 +48,7 @@ Every step is explained in detail further down.
 cd C:\Code
 git clone https://github.com/Simpledog1/SolutionSync.git
 cd SolutionSync
-Copy-Item config.example.json config.json -Force
+Copy-Item config.example.json config.json
 notepad config.json
 ```
 
@@ -249,12 +249,12 @@ Installation is done; next, configure it.
 ### Required: create your config.json
 
 `config.json` in the SolutionSync folder holds your settings. **It contains no passwords
-or tokens.** The copy that comes with the download holds the project author's settings, so
-replace it with the template and open it:
+or tokens.** It isn't part of the download, and Git ignores it, so your settings are never
+committed or overwritten by updates. Create it from the template and open it:
 
 ```powershell
 cd C:\Code\SolutionSync
-Copy-Item config.example.json config.json -Force
+Copy-Item config.example.json config.json
 notepad config.json
 ```
 
@@ -822,8 +822,9 @@ Only one runs, by design. Nothing to fix.
 | `logs\solsync.log` | Activity log, kept to about 6 files of 1 MB each. |
 | `inbox\hackerrank\` | Your HackerRank export (personal data). |
 
-All of it stays after you close the dashboard or restart the PC. `state`, `logs` and
-`inbox` are excluded from Git by `.gitignore`, so they cannot be committed by accident.
+All of it stays after you close the dashboard or restart the PC. `config.json`, `state`,
+`logs` and `inbox` are excluded from Git by `.gitignore`, so they cannot be committed by
+accident.
 
 **Credentials.** Your Exercism token is stored in Windows Credential Manager under
 `SolutionSync-Exercism`, tied to your Windows account. Your GitHub login is stored by Git
@@ -859,11 +860,12 @@ folder. Your solutions themselves are safe on GitHub.
    git pull
    ```
 
-Your settings and history are kept: `state`, `logs` and `inbox` are never touched by Git.
-There are no dependencies to update.
+Your settings and history are kept: `config.json`, `state`, `logs` and `inbox` are never
+touched by Git. There are no dependencies to update.
 
-If `git pull` stops with `Your local changes to the following files would be overwritten
-by merge: config.json`, nothing has been changed yet. Keep your settings like this:
+**Downloaded SolutionSync before 28 October 2026?** Back then `config.json` was part of the
+download, and the next `git pull` removes that copy. Save your settings first, then put
+them back after the update:
 
 ```powershell
 Copy-Item config.json config.mine.json
@@ -872,8 +874,9 @@ git pull
 Copy-Item config.mine.json config.json -Force
 ```
 
-The first line saves your settings, the second temporarily puts back the downloaded
-version so the update can go ahead, and the last line restores your settings.
+The first line saves your settings, the second undoes your edits to the old downloaded
+copy so the update can go ahead, and the last line restores your settings. You only need
+this once.
 
 If you moved the folder or reinstalled Python, run `install_task.ps1` again so the task
 points to the right place.
