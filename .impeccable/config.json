@@ -1,0 +1,44 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "skipped-heading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/*.html"
+        ],
+        "createdAt": "2026-10-28T09:08:17.289Z",
+        "reason": "Claude: throwaway direction-round sketches, git-ignored, never shipped; the real dashboard is checked separately"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/*.html"
+        ],
+        "createdAt": "2026-10-28T09:08:17.550Z",
+        "reason": "Claude: throwaway direction-round sketches, git-ignored, never shipped; the real dashboard is checked separately"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/*.html"
+        ],
+        "createdAt": "2026-10-28T09:08:17.814Z",
+        "reason": "Claude: throwaway direction-round sketches, git-ignored, never shipped; the real dashboard is checked separately"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/*.html"
+        ],
+        "createdAt": "2026-10-28T09:08:18.068Z",
+        "reason": "Claude: throwaway direction-round sketches, git-ignored, never shipped; the real dashboard is checked separately"
+      }
+    ]
+  }
+}

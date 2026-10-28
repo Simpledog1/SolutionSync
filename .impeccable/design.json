@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-28T00:00:00Z",
+  "title": "Design System: SolutionSync",
+  "extensions": {
+    "colorMeta": {
+      "ground":     { "role": "neutral", "displayName": "Sea-Glass Ground", "dark": "#08171d", "tonalRamp": ["#08171d", "#0e232b", "#122c36", "#1f3d47", "#536f79", "#cddbd6", "#e6eeeb", "#f2f7f5"] },
+      "panel":      { "role": "neutral", "displayName": "Chart Paper", "dark": "#0e232b" },
+      "panel-2":    { "role": "neutral", "displayName": "Shallows", "dark": "#122c36" },
+      "ink":        { "role": "neutral", "displayName": "Deep Ink", "dark": "#e2eeea" },
+      "ink-2":      { "role": "neutral", "displayName": "Channel Ink", "dark": "#a8c4bd" },
+      "ink-3":      { "role": "neutral", "displayName": "Sounding Ink", "dark": "#8eada6" },
+      "line":       { "role": "neutral", "displayName": "Hairline", "dark": "#1f3d47" },
+      "line-2":     { "role": "neutral", "displayName": "Faint Hairline", "dark": "#183540" },
+      "rail":       { "role": "primary", "displayName": "Deep-Sea Teal", "dark": "#0c3340", "tonalRamp": ["#08171d", "#0e3442", "#164a5b", "#22596a", "#3f7a8a", "#6fa3ae", "#a9cbc1", "#e2efea"] },
+      "rail-2":     { "role": "primary", "displayName": "Rail Swell", "dark": "#154656" },
+      "rail-ink":   { "role": "neutral", "displayName": "Rail Ink", "dark": "#e2eeea" },
+      "rail-ink-2": { "role": "neutral", "displayName": "Rail Ink Dim", "dark": "#a3c7bd" },
+      "rail-line":  { "role": "neutral", "displayName": "Rail Line", "dark": "#1e5262" },
+      "foam":       { "role": "primary", "displayName": "Sea Foam", "dark": "#4fc1a8", "tonalRamp": ["#10372f", "#1b6a5a", "#2a8270", "#3f9b88", "#4fc1a8", "#84dcc8", "#b6ead9", "#dcefe8"] },
+      "foam-ink":   { "role": "primary", "displayName": "Foam Ink", "dark": "#84dcc8" },
+      "foam-bg":    { "role": "primary", "displayName": "Foam Wash", "dark": "#10372f" },
+      "buoy":       { "role": "secondary", "displayName": "Buoy Orange", "dark": "#f08a4b", "tonalRamp": ["#3a2416", "#7a300b", "#a3400f", "#d9581c", "#f08a4b", "#f6a877", "#f9c9aa", "#fbe6da"] },
+      "buoy-ink":   { "role": "secondary", "displayName": "Buoy Ink", "dark": "#f6a877" },
+      "buoy-bg":    { "role": "secondary", "displayName": "Buoy Wash", "dark": "#3a2416" },
+      "storm":      { "role": "secondary", "displayName": "Signal Red", "dark": "#ff7b6f", "tonalRamp": ["#3d1b19", "#7a1d17", "#a12a21", "#c4372d", "#ff7b6f", "#ff9d93", "#fcc4bd", "#f8e0dc"] },
+      "storm-ink":  { "role": "secondary", "displayName": "Storm Ink", "dark": "#ff9d93" },
+      "storm-bg":   { "role": "secondary", "displayName": "Storm Wash", "dark": "#3d1b19" },
+      "brass":      { "role": "tertiary", "displayName": "Chart Brass", "dark": "#d4b04a", "tonalRamp": ["#3a2f10", "#765c10", "#8c7a45", "#b08a1e", "#d4b04a", "#e3c66d", "#dcc790", "#f3ead0"] },
+      "brass-ink":  { "role": "tertiary", "displayName": "Brass Ink", "dark": "#e3c66d" },
+      "sand":       { "role": "tertiary", "displayName": "Sand", "dark": "#8c7a45" },
+      "mist":       { "role": "neutral", "displayName": "Mist", "dark": "#56717a" },
+      "btn":        { "role": "primary", "displayName": "Action", "dark": "#4fc1a8" },
+      "btn-ink":    { "role": "primary", "displayName": "Action Ink", "dark": "#062019" },
+      "btn-hover":  { "role": "primary", "displayName": "Action Hover", "dark": "#6fd1bb" }
+    },
+    "typographyMeta": {
+      "display":  { "displayName": "Tide Figure", "purpose": "Today's tide count / limit only; 42px under 760px." },
+      "headline": { "displayName": "Page Title", "purpose": "Header title; 22px on mobile." },
+      "figure":   { "displayName": "Reading", "purpose": "Figures band values, always with a proof line." },
+      "title":    { "displayName": "Panel Title", "purpose": "Panel heads 16px; bulletin verdict and dialogs 18px; drawer 20px." },
+      "body":     { "displayName": "Prose", "purpose": "Sentences, context lines (14px ink-2), help text capped at 60ch." },
+      "label":    { "displayName": "Column Label", "purpose": "Uppercase tracked table heads and timeline day dividers only." }
+    },
+    "shadows": [
+      { "name": "ambient-panel", "value": "0 1px 2px rgba(14,52,66,.06), 0 6px 18px -8px rgba(14,52,66,.18)", "dark": "0 1px 2px rgba(0,0,0,.4), 0 8px 22px -10px rgba(0,0,0,.6)", "purpose": "Every resting container: panels, bulletin, figures, tables, toasts." },
+      { "name": "dialog", "value": "0 24px 60px -20px rgba(0,0,0,.45)", "purpose": "Confirm dialog and detail drawer, over a rgba(6,18,23,.45) scrim." },
+      { "name": "button-rest", "value": "0 1px 1px rgba(14,52,66,.05)", "purpose": "Secondary buttons at rest." }
+    ],
+    "motion": [
+      { "name": "ease-tide", "value": "cubic-bezier(.16, 1, .3, 1)", "purpose": "Tide draw-in and toast entrance." },
+      { "name": "tide-draw", "value": "line 1100ms; fill 900ms +250ms; markers 400ms +500ms, 80ms stagger", "purpose": "The one authored motion: plays once via Web Animations when visible; skipped under prefers-reduced-motion; chart is complete by default." },
+      { "name": "state-transition", "value": "150ms", "purpose": "Background, border and color on buttons and nav items; 120ms on table rows." },
+      { "name": "syncing-pennant", "value": "wave 1.2s ease-in-out infinite", "purpose": "Pennant flag while a sync runs; reduced-motion gated." },
+      { "name": "progress-breathe", "value": "breathe 1.6s ease-in-out infinite", "purpose": "Indeterminate run progress; reduced-motion gated." }
+    ],
+    "breakpoints": [
+      { "name": "stack", "value": "980px" },
+      { "name": "mobile", "value": "760px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "One per action group: Run Sync, Save settings, Continue.",
+      "html": "<button class=\"ds-btn ds-btn-primary\"><svg class=\"ds-ico\" viewBox=\"0 0 24 24\"><path d=\"M12 15V4M7.5 8.5 12 4l4.5 4.5\"/><path d=\"M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3\"/></svg>Run Sync</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 7px; border: 1px solid var(--line, #cddbd6); background: var(--panel, #fff); color: var(--ink, #0f2a33); font: 600 14px \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; cursor: pointer; transition: background .15s, border-color .15s, transform .1s; } .ds-btn-primary { background: var(--btn, #0e3442); border-color: var(--btn, #0e3442); color: var(--btn-ink, #fff); } .ds-btn-primary:hover { background: var(--btn-hover, #164a5b); border-color: var(--btn-hover, #164a5b); } .ds-btn:active { transform: translateY(1px); } .ds-btn:focus-visible { outline: 2px solid var(--foam, #3f9b88); outline-offset: 2px; } .ds-ico { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Scan, Refresh, Cancel; icon-only on mobile header.",
+      "html": "<button class=\"ds-btn2\">Refresh</button>",
+      "css": ".ds-btn2 { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 7px; border: 1px solid var(--line, #cddbd6); background: var(--panel, #fff); color: var(--ink, #0f2a33); font: 600 14px \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; cursor: pointer; box-shadow: 0 1px 1px rgba(14,52,66,.05); transition: background .15s, border-color .15s, transform .1s; } .ds-btn2:hover { border-color: var(--mist, #a3b6bb); background: var(--panel-2, #f2f7f5); } .ds-btn2:active { transform: translateY(1px); } .ds-btn2:focus-visible { outline: 2px solid var(--foam, #3f9b88); outline-offset: 2px; } .ds-btn2:disabled { opacity: .5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Status Chips",
+      "kind": "chip",
+      "refersTo": "chip-published",
+      "description": "The five-status vocabulary; Unable to Verify has a hollow dot and is never shown as Missing.",
+      "html": "<span class=\"ds-chip ds-pub\">Published</span> <span class=\"ds-chip ds-miss\">Missing</span> <span class=\"ds-chip\">Pending</span> <span class=\"ds-chip ds-fail\">Failed</span> <span class=\"ds-chip ds-unv\">Unable to Verify</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 999px; font: 600 12.5px \"Segoe UI Variable Text\", \"Segoe UI\", sans-serif; white-space: nowrap; background: var(--panel-2, #f2f7f5); color: var(--ink-2, #3a5761); } .ds-chip::before { content: \"\"; width: 7px; height: 7px; border-radius: 50%; background: currentColor; } .ds-pub { background: var(--foam-bg, #dcefe8); color: var(--foam-ink, #1b6a5a); } .ds-miss { background: var(--buoy-bg, #fbe6da); color: var(--buoy-ink, #a3400f); } .ds-fail { background: var(--storm-bg, #f8e0dc); color: var(--storm-ink, #a12a21); } .ds-unv { color: var(--ink-3, #536f79); } .ds-unv::before { background: none; border: 1.5px solid currentColor; width: 5px; height: 5px; }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Toolbar search with inset stroke icon.",
+      "html": "<label class=\"ds-search\"><svg viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M20 20l-4.2-4.2\"/></svg><input type=\"search\" placeholder=\"Search by solution name\"></label>",
+      "css": ".ds-search { position: relative; display: block; max-width: 420px; } .ds-search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--ink-3, #536f79); stroke-width: 1.75; stroke-linecap: round; } .ds-search input { width: 100%; font: 14px \"Segoe UI Variable Text\", \"Segoe UI\", sans-serif; color: var(--ink, #0f2a33); background: var(--panel, #fff); border: 1px solid var(--line, #cddbd6); border-radius: 7px; padding: 9px 12px 9px 34px; min-height: 40px; } .ds-search input:hover { border-color: var(--mist, #a3b6bb); } .ds-search input:focus-visible { outline: 2px solid var(--foam, #3f9b88); outline-offset: 2px; }"
+    },
+    {
+      "name": "Rail Navigation",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Deep-teal rail; the current item carries a foam pennant.",
+      "html": "<nav class=\"ds-rail\"><button class=\"ds-nav\" aria-current=\"page\">Overview</button><button class=\"ds-nav\">Solutions</button><button class=\"ds-nav\">Settings</button></nav>",
+      "css": ".ds-rail { background: var(--rail, #0e3442); padding: 14px; display: grid; gap: 2px; width: 236px; } .ds-nav { display: flex; align-items: center; padding: 10px 12px; border: 0; background: none; color: var(--rail-ink-2, #a9cbc1); border-radius: 6px; font: 500 15px \"Segoe UI Variable Text\", \"Segoe UI\", sans-serif; text-align: left; cursor: pointer; position: relative; transition: background .15s, color .15s; } .ds-nav:hover { background: rgba(226,239,234,.06); color: var(--rail-ink, #e2efea); } .ds-nav:focus-visible { outline: 2px solid var(--foam, #3f9b88); outline-offset: 2px; } .ds-nav[aria-current=\"page\"] { background: var(--rail-2, #164a5b); color: var(--rail-ink, #e2efea); } .ds-nav[aria-current=\"page\"]::after { content: \"\"; position: absolute; right: 10px; top: 50%; width: 7px; height: 12px; margin-top: -6px; background: var(--foam, #3f9b88); clip-path: polygon(0 0, 100% 50%, 0 100%); }"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Every container: 8px, hairline, ambient shadow, Bahnschrift head with meta.",
+      "html": "<section class=\"ds-panel\"><div class=\"ds-panel-head\"><h2>Repositories</h2><span>GitHub verification</span></div><div class=\"ds-panel-body\">Body content</div></section>",
+      "css": ".ds-panel { background: var(--panel, #fff); color: var(--ink, #0f2a33); border: 1px solid var(--line, #cddbd6); border-radius: 8px; box-shadow: 0 1px 2px rgba(14,52,66,.06), 0 6px 18px -8px rgba(14,52,66,.18); font: 15px/1.5 \"Segoe UI Variable Text\", \"Segoe UI\", sans-serif; } .ds-panel-head { display: flex; align-items: baseline; gap: 12px; padding: 16px 20px 0; } .ds-panel-head h2 { margin: 0; font: 600 16px/1.3 Bahnschrift, \"Segoe UI\", sans-serif; letter-spacing: .01em; } .ds-panel-head span { margin-left: auto; color: var(--ink-3, #536f79); font-size: 13px; } .ds-panel-body { padding: 14px 20px 18px; }"
+    },
+    {
+      "name": "Harbor Bulletin",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Verdict strip opening the Overview: fair, caution, storm.",
+      "html": "<div class=\"ds-bulletin ds-caution\"><span class=\"ds-flag\"></span><div><h2>Caution · needs a look</h2><p>2 could not be verified</p></div></div>",
+      "css": ".ds-bulletin { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: 8px; border: 1px solid var(--line, #cddbd6); background: var(--panel, #fff); color: var(--ink, #0f2a33); box-shadow: 0 1px 2px rgba(14,52,66,.06), 0 6px 18px -8px rgba(14,52,66,.18); } .ds-flag { width: 14px; height: 26px; flex: none; clip-path: polygon(0 0, 100% 50%, 0 100%); background: var(--foam, #3f9b88); } .ds-bulletin h2 { margin: 0; font: 600 18px/1.3 Bahnschrift, \"Segoe UI\", sans-serif; } .ds-bulletin p { margin: 2px 0 0; font: 14px \"Segoe UI Variable Text\", \"Segoe UI\", sans-serif; color: var(--ink-2, #3a5761); } .ds-caution { background: var(--buoy-bg, #fbe6da); border-color: var(--buoy, #d9581c); } .ds-caution .ds-flag { background: var(--buoy, #d9581c); } .ds-caution p, .ds-storm p { color: var(--ink, #0f2a33); } .ds-storm { background: var(--storm-bg, #f8e0dc); border-color: var(--storm, #c4372d); } .ds-storm .ds-flag { background: var(--storm, #c4372d); }"
+    },
+    {
+      "name": "Figures Band",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "One hairline-divided band of readings, each with a proof line.",
+      "html": "<dl class=\"ds-figs\"><div class=\"ds-fig\"><dt>Published</dt><dd><span class=\"ds-v\">128</span><span class=\"ds-proof\">verified on GitHub</span></dd></div><div class=\"ds-fig\"><dt>Missing</dt><dd><span class=\"ds-v\">41</span><span class=\"ds-proof\">waiting for a daily slot</span></dd></div><div class=\"ds-fig ds-alert\"><dt>Failed</dt><dd><span class=\"ds-v\">1</span><span class=\"ds-proof\">see Activity</span></dd></div></dl>",
+      "css": ".ds-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin: 0; background: var(--panel, #fff); border: 1px solid var(--line, #cddbd6); border-radius: 8px; overflow: hidden; } .ds-fig { padding: 16px 18px; box-shadow: -1px 0 0 var(--line-2, #e0e9e5), 0 -1px 0 var(--line-2, #e0e9e5); } .ds-fig dt { font: 600 13px \"Segoe UI Variable Text\", \"Segoe UI\", sans-serif; color: var(--ink-2, #3a5761); } .ds-fig dd { margin: 4px 0 0; } .ds-v { display: block; font: 600 30px/1.1 Bahnschrift, \"Segoe UI\", sans-serif; font-variant-numeric: tabular-nums; color: var(--ink, #0f2a33); } .ds-proof { display: block; margin-top: 4px; font: 12.5px/1.35 \"Segoe UI Variable Text\", \"Segoe UI\", sans-serif; color: var(--ink-3, #536f79); } .ds-alert .ds-v { color: var(--storm-ink, #a12a21); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Harbor Tide Table",
+    "overview": "SolutionSync looks like a printed harbor tide table that has been made interactive. A deep-sea teal rail holds the chart's title and the automation pennant. The working area is sea-glass ground with white panels, all drawn from one tide-water tonal ramp. Each Manila day is a single tide that rises with verified uploads. Before any figure, the visitor reads a harbor-conditions bulletin (fair, caution or storm) that answers \"is everything OK\".\n\nThe density is that of a calm operations sheet. There is one hairline weight, one 8px corner and one tonal ramp. Figures and labels are set in Bahnschrift with tabular numerals, the way a tide table sets its readings. Prose is set in Segoe UI Variable. Every number is printed next to its proof: a figure gets a one-line sentence underneath saying where it came from. The system has light and dark tides that follow `prefers-color-scheme`. The rail stays deep teal in both, and in dark mode it remains a distinct band against the near-black sea.\n\nThe world rejects the category default of a row of identical stat tiles above a generic chart. Figures sit in one band divided by hairlines, and the chart is the day's tide drawn against the limit.",
+    "keyCharacteristics": [
+      "Deep-teal rail with a triangular pennant flag. The flag marks automation state at the rail's foot and the current nav item.",
+      "Sea-foam means published and healthy, buoy orange means attention, signal red means failure, and chart brass means limits and schedule.",
+      "Bahnschrift with tabular numerals for every figure, heading and label. Segoe UI Variable for sentences.",
+      "Single 1px hairlines, an 8px panel corner, and a soft ambient shadow only.",
+      "One authored motion: the tide line draws in once."
+    ],
+    "rules": [
+      { "name": "The Signal Meaning Rule", "body": "Foam means healthy, buoy means look, storm means failed, and brass means limit or schedule. A signal hue never decorates. If nothing is wrong, no orange or red appears on the screen.", "section": "colors" },
+      { "name": "The One Tide-Water Ramp Rule", "body": "Ground, panels, recessed surfaces and hairlines all come from the same teal-grey ramp. Do not introduce a neutral from outside it.", "section": "colors" },
+      { "name": "The Two Tides Rule", "body": "Every surface must work in both the light and dark tide. Colors come only from the custom properties, which swap under `prefers-color-scheme: dark`.", "section": "colors" },
+      { "name": "The Tide-Table Numerals Rule", "body": "Every count, time and quantity is set in Bahnschrift with `font-variant-numeric: tabular-nums`, so columns of readings line up.", "section": "typography" },
+      { "name": "The Proof Line Rule", "body": "A figure is never printed alone. It always comes with a 12.5px ink-3 sentence saying what it counts or where it was checked.", "section": "typography" },
+      { "name": "The Single Hairline Rule", "body": "Borders are always 1px, using `line` for container edges and `line-2` for internal separators. In the figures band, separators are drawn with inset 1px shadows so they survive any column wrap.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do read state from the bulletin first. Fair, caution or storm decides whether any buoy or storm color appears below it.",
+      "Do set every number in Bahnschrift with tabular numerals and give it a proof line.",
+      "Do take colors only from the custom properties so both tides work. Check every new surface in light and dark.",
+      "Do use the pennant triangle for state and current-location marks.",
+      "Do keep motion state-driven and gated by `prefers-reduced-motion`. The tide draw-in is the only authored entrance, and every view is complete without motion.",
+      "Do draw icons from the inline sprite at a 1.75 stroke in currentColor."
+    ],
+    "donts": [
+      "Don't build rows of identical stat tiles over a generic chart. Figures share one hairline-divided band.",
+      "Don't load external fonts or assets. Only Windows system faces and inline SVG are allowed.",
+      "Don't use buoy or storm hues for decoration, and don't show Unable to Verify as Missing.",
+      "Don't add a second border weight or new corner radii beyond 4 / 6 / 7 / 8 / 12px and the pill.",
+      "Don't use hard offset or colored shadows. Depth is the ambient shadow plus the tonal ramp."
+    ]
+  }
+}

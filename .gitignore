@@ -11,6 +11,12 @@ venv/
 .vscode/
 .idea/
 Thumbs.db
+# design-tool working files (the surface brief, DESIGN.md and design.json are kept)
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/*.out
+.impeccable/hook.cache.json
+.impeccable/decision-direction.json
 # never commit secrets or browser data
 *.token
 *.secret
