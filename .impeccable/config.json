@@ -38,6 +38,15 @@
         ],
         "createdAt": "2026-10-28T09:08:18.068Z",
         "reason": "Claude: throwaway direction-round sketches, git-ignored, never shipped; the real dashboard is checked separately"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/*.html"
+        ],
+        "createdAt": "2026-10-28T09:13:18.293Z",
+        "reason": "Claude: throwaway direction-round sketches written before DESIGN.md existed; git-ignored, never shipped"
       }
     ]
   }
