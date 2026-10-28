@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import threading
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -76,6 +77,7 @@ class Config:
     hackerrank_inbox: Path
     max_downloads_per_run: int = 10
     max_daily_limit: int = 20
+    theme: str = "harbor"
     state_dir: Path = field(init=False)
     log_dir: Path = field(init=False)
 
@@ -104,19 +106,37 @@ def validate_limit(value, max_limit: int) -> int:
     return value
 
 
-def save_daily_limit(value, path: Path | None = None) -> int:
-    """Validate and store a new daily limit in config.json, atomically.
+THEMES = ("harbor", "midnight", "paper", "forest")  # dashboard color themes, exactly four
+DEFAULT_THEME = "harbor"
+_save_lock = threading.Lock()  # one dashboard saving the limit and the theme at once
 
-    On any error the file is left exactly as it was.
+
+def _update_config(path: Path, key: str, check) -> object:
+    """Set one key in config.json, atomically, keeping every other setting as it is.
+
+    `check(raw)` returns the validated value or raises ConfigError. On any error the file
+    is left exactly as it was.
     """
-    path = path or data_root() / "config.json"
-    raw = json.loads(path.read_text(encoding="utf-8-sig"))  # tolerate Notepad's BOM
-    limit = validate_limit(value, raw.get("max_daily_limit", DEFAULT_MAX_LIMIT))
-    raw["daily_limit"] = limit
-    tmp = path.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(raw, indent=2) + "\n", encoding="utf-8")
-    os.replace(tmp, path)  # all-or-nothing: readers see the old file or the new one
-    return limit
+    with _save_lock:
+        raw = json.loads(path.read_text(encoding="utf-8-sig"))  # tolerate Notepad's BOM
+        raw[key] = value = check(raw)
+        tmp = path.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(raw, indent=2) + "\n", encoding="utf-8")
+        os.replace(tmp, path)  # all-or-nothing: readers see the old file or the new one
+    return value
+
+
+def save_daily_limit(value, path: Path | None = None) -> int:
+    """Validate and store a new daily limit in config.json."""
+    return _update_config(path or data_root() / "config.json", "daily_limit",
+                          lambda raw: validate_limit(value, raw.get("max_daily_limit", DEFAULT_MAX_LIMIT)))
+
+
+def save_theme(value, path: Path | None = None) -> str:
+    """Validate and store the dashboard theme in config.json."""
+    if value not in THEMES:
+        raise ConfigError(f"Unknown theme {value!r}; choose one of: {', '.join(THEMES)}.")
+    return _update_config(path or data_root() / "config.json", "theme", lambda raw: value)
 
 
 def load_config(path: Path | None = None, root: Path | None = None) -> Config:
@@ -163,4 +183,6 @@ def load_config(path: Path | None = None, root: Path | None = None) -> Config:
         exercism_credential_target=ex.get("credential_target", "SolutionSync-Exercism"),
         hackerrank_inbox=inbox if inbox.is_absolute() else root / inbox,
         max_downloads_per_run=int(raw.get("max_downloads_per_run", 10)),
+        # cosmetic only: a missing or unknown value falls back instead of stopping the engine
+        theme=raw.get("theme") if raw.get("theme") in THEMES else DEFAULT_THEME,
     )

@@ -1,6 +1,7 @@
 """Dashboard backend: settings, statuses, quota display, job control and HTTP safety."""
 import json
 import os
+import re
 import tempfile
 import threading
 import unittest
@@ -11,7 +12,7 @@ from pathlib import Path
 from unittest import mock
 
 from solsync import dashboard
-from solsync.config import ConfigError, load_config, manila_day, save_daily_limit
+from solsync.config import THEMES, ConfigError, load_config, manila_day, save_daily_limit, save_theme
 from solsync.ledger import Ledger
 from solsync.models import Candidate
 
@@ -93,6 +94,52 @@ class SettingsTests(ProjectTestCase):
             with self.assertRaises(OSError):
                 save_daily_limit(7, self.config)
         self.assertEqual(self.cfg().daily_limit, 5)
+
+
+class ThemeTests(ProjectTestCase):
+    def test_exactly_four_themes_harbor_is_the_default(self):
+        self.assertEqual(THEMES, ("harbor", "midnight", "paper", "forest"))
+        self.assertEqual(self.cfg().theme, "harbor")                  # nothing saved yet
+        page = dashboard.PAGE.read_text(encoding="utf-8")
+        self.assertEqual(sorted(re.findall(r'name="theme" value="(\w+)"', page)), sorted(THEMES))
+        for t in THEMES:                                               # every choice has its colors
+            self.assertIn(f'[data-theme="{t}"]', page)
+
+    def test_saved_theme_survives_restart_and_keeps_other_settings(self):
+        save_daily_limit(6, self.config)
+        for t in THEMES:
+            save_theme(t, self.config)
+            self.assertEqual(self.cfg().theme, t)                      # a new process reads it again
+        raw = json.loads(self.config.read_text())
+        self.assertEqual((raw["daily_limit"], raw["repos"]), (6, BASE_CONFIG["repos"]))
+
+    def test_invalid_saved_theme_falls_back_and_bad_saves_change_nothing(self):
+        for bad in ("neon", "", 5, None, ["paper"], "Harbor"):
+            self.config.write_text(json.dumps({**BASE_CONFIG, "theme": bad}))
+            self.assertEqual(self.cfg().theme, "harbor", bad)
+        before = self.config.read_text()
+        for bad in ("neon", "", None, 3):
+            with self.subTest(bad=bad), self.assertRaises(ConfigError):
+                save_theme(bad, self.config)
+        self.assertEqual(self.config.read_text(), before)
+
+    def test_limit_and_theme_saved_at_the_same_time_do_not_clash(self):
+        errors = []
+
+        def work(i):
+            try:
+                save_daily_limit(i % 5, self.config) if i % 2 else save_theme(THEMES[i % 4], self.config)
+            except Exception as exc:
+                errors.append(exc)
+        threads = [threading.Thread(target=work, args=(i,)) for i in range(40)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        self.assertEqual(errors, [])
+        cfg = self.cfg()
+        self.assertIn(cfg.theme, THEMES)
+        self.assertIn(cfg.daily_limit, range(5))
 
 
 class StatusTests(unittest.TestCase):
@@ -263,6 +310,35 @@ class HttpTests(ProjectTestCase):
             urllib.request.urlopen(req, timeout=10)
         self.assertEqual(ctx.exception.code, 403)
         self.assertEqual(load_config(root=self.root).daily_limit, 4)
+
+    def page(self):
+        req = urllib.request.Request(f"http://127.0.0.1:{self.port}/")
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.read().decode()
+
+    def test_theme_switch_through_ui_persists_and_touches_nothing_else(self):
+        self.assertIn('<html lang="en" data-theme="harbor">', self.page())
+        before = self.call("/api/overview")[1]
+        events_before = len(self.call("/api/events")[1])
+        for t in ("midnight", "paper", "forest", "harbor", "forest"):
+            code, r = self.call("/api/settings", {"theme": t})
+            self.assertEqual((code, r), (200, {"ok": True, "theme": t}))
+        self.assertIn('<html lang="en" data-theme="forest">', self.page())   # applied before first paint
+        after = self.call("/api/overview")[1]
+        self.assertEqual(after["theme"], "forest")
+        self.assertEqual(after["quota"], before["quota"])              # limit and today's count untouched
+        self.assertEqual(after["history"], before["history"])
+        self.assertEqual(len(self.call("/api/events")[1]), events_before)
+        self.assertIsNone(self.jobs.job)                               # no scan or sync was started
+        self.assertEqual(load_config(root=self.root).daily_limit, 4)
+
+    def test_invalid_theme_through_ui_is_refused(self):
+        for bad in ("neon", "", None, 7):
+            code, r = self.call("/api/settings", {"theme": bad})
+            self.assertEqual((code, r["ok"]), (400, False), bad)
+        self.assertEqual(load_config(root=self.root).theme, "harbor")
+        self.config.write_text("{ broken")                             # page still loads, in the default
+        self.assertIn('data-theme="harbor"', self.page())
 
     def test_duplicate_job_request_is_refused(self):
         with mock.patch.object(self.jobs, "_run", side_effect=lambda job: None):

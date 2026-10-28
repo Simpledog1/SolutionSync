@@ -471,9 +471,28 @@ Your browser opens **http://127.0.0.1:8765**. If it doesn't, open that address y
 | **Overview** | A status banner (**Fair** = all good, **Caution** = needs a look, **Storm** = something failed), today's uploads against your limit, each repository's progress, totals, the last 14 days and recent activity. Buttons: **Scan solutions** and **Refresh GitHub status** (dry runs: check everything, upload nothing), **Run sync** (upload within today's limit; asks first), **Pause / Resume automation** (turns the scheduled task off and on). |
 | **Solutions** | Every solution with its GitHub status: **Published**, **Missing**, **Pending**, **Failed** or **Unable to Verify** (GitHub could not be checked). Filter by platform and status, search by name, and click a row for its file paths, GitHub link and last error. |
 | **Activity logs** | Scans, uploads, limit changes, pauses and errors, grouped by day, with filters. |
-| **Settings** | Change the **daily upload limit**. |
+| **Settings** | Change the **daily upload limit** and the **theme**. |
 
 **Run sync** respects `uploads_enabled`: while it is `false`, it does a dry run.
+
+#### Themes
+
+The dashboard has four color themes. Choose one under **Settings → Theme**: click it, or
+use the arrow keys.
+
+| Theme | Looks like |
+|---|---|
+| **Harbor Tide** (default) | Deep teal side bar, sea-glass panels, orange for attention. Light or dark, following your Windows light/dark setting. |
+| **Midnight** | Dark navy with cyan accents, for night use. Always dark. |
+| **Paper** | Bright warm white with ink-blue accents. Always light. |
+| **Forest** | Evergreen side bar and sage panels, amber for attention. Always light. |
+
+- The new colors appear immediately, with no reload or restart.
+- Your choice is saved in `config.json` (`"theme"`), so it stays after refreshing,
+  restarting the dashboard or reopening it. The web dashboard and the desktop app share it.
+- Changing the theme only changes colors. It never changes the daily limit or upload
+  history, and never starts a scan or sync.
+- If the saved value is missing or isn't one of the four, the dashboard uses Harbor Tide.
 
 ### 6.2 Command line
 
@@ -600,6 +619,7 @@ again, so **no restart is needed** after a change.
 | `exercism.credential_target` | Name of the Credential Manager entry holding your token | `SolutionSync-Exercism` | Any name you stored with `cmdkey` | `config.json` |
 | `exercism.api_base` | Exercism API address; leave as is | `https://api.exercism.org` | | `config.json` |
 | `hackerrank.inbox` | Folder for your HackerRank export (relative to the SolutionSync folder, or a full path) | `inbox/hackerrank` | A folder path | `config.json` |
+| `theme` | Dashboard color theme (not in the template until you pick one) | `harbor` | `harbor`, `midnight`, `paper`, `forest`; anything else means `harbor` | Dashboard → Settings → Theme |
 
 Advanced: the environment variable `SOLSYNC_HOME` makes SolutionSync use a different folder
 for `config.json`, `state`, `logs` and `inbox` (see [DESKTOP.md](DESKTOP.md#first-launch-where-your-data-lives)).

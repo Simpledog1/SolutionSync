@@ -10,7 +10,7 @@ and includes its own copy of Python. It does not replace the web dashboard;
 | Open it | `py -m solsync dashboard` | Start menu → **SolutionSync** |
 | Window | your browser | its own window (Microsoft Edge WebView2) |
 | Python needed | yes | no |
-| Settings, upload history, daily limit | shared | shared |
+| Settings, theme, upload history, daily limit | shared | shared |
 
 **Still required on the PC:** [Git for Windows](https://git-scm.com/download/win) (the app
 commits and pushes with it), and the Microsoft Edge WebView2 Runtime, which Windows 10 and 11

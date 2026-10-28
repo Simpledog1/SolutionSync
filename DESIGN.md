@@ -190,6 +190,21 @@ Dark mode swaps every token in place (see `.impeccable/design.json` colorMeta). 
 
 **The Two Tides Rule.** Every surface must work in both the light and dark tide. Colors come only from the custom properties, which swap under `prefers-color-scheme: dark`.
 
+### Themes
+
+There are exactly four user-selectable themes. Each is a complete set of the same tokens in a `[data-theme="…"]` block in `dashboard.html`. Components read only tokens, so a theme never needs its own component rules. The token names keep their harbor roles in every theme: foam is action and healthy, buoy is attention, storm is failure, brass is limit and schedule.
+
+| Theme | id | Character | Light/dark |
+|---|---|---|---|
+| **Harbor Tide** (default) | `harbor` | The palette above. | Follows `prefers-color-scheme` (both tides). |
+| **Midnight** | `midnight` | Navy-charcoal ground (#0f1623), lighter navy panels, near-black rail, cyan foam (#4ec3d4), amber buoy. | Always dark. |
+| **Paper** | `paper` | Warm white ground (#f6f4ef), white panels, a light warm rail with dark ink, ink-blue foam (#3a72b8 / #24548f), orange kept for attention. | Always light. |
+| **Forest** | `forest` | Sage ground (#e7ede4), evergreen rail (#1f3a2c), leaf-green foam (#4a8f5f), amber buoy (#b97a12), brick storm, bark brass. | Always light. |
+
+Tokens added for theming: `--pick` / `--pick-ink` (pressed segmented control; the rail color in Harbor Tide), `--rail-hover`, `--sel-ink` (text selection), `--brand-tile` / `--brand-wave` / `--brand-arrow` (logo), `--btn-shadow` and `--scrim` (dialog backdrop).
+
+The server writes the saved theme onto `<html data-theme>` before the page is sent, so there is no flash of the default. The Settings page's Theme panel is a native radio group. Each option's preview carries its own `data-theme`, so it is drawn from that theme's real tokens. Text pairs meet WCAG AA (4.5:1) in all five palettes. The decorative `mist` stroke stays below 3:1 in the light palettes, as it always has in Harbor Tide.
+
 ## Typography
 
 **Display / Figure / Label Font:** Bahnschrift (with DIN Alternate, DIN 2014, Segoe UI)

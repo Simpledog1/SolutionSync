@@ -7,21 +7,30 @@
 <title>SolutionSync</title>
 <style>
 :root {
-  --ground: #e6eeeb; --panel: #ffffff; --panel-2: #f2f7f5; --ink: #0f2a33; --ink-2: #3a5761; --ink-3: #536f79;
-  --line: #cddbd6; --line-2: #e0e9e5;
-  --rail: #0e3442; --rail-2: #164a5b; --rail-ink: #e2efea; --rail-ink-2: #a9cbc1; --rail-line: #22596a;
-  --foam: #3f9b88; --foam-ink: #1b6a5a; --foam-bg: #dcefe8;
-  --buoy: #d9581c; --buoy-ink: #a3400f; --buoy-bg: #fbe6da;
-  --storm: #c4372d; --storm-ink: #a12a21; --storm-bg: #f8e0dc;
-  --brass: #b08a1e; --brass-ink: #765c10; --sand: #dcc790; --mist: #a3b6bb;
-  --btn: #0e3442; --btn-ink: #ffffff; --btn-hover: #164a5b;
-  --shadow: 0 1px 2px rgba(14, 52, 66, .06), 0 6px 18px -8px rgba(14, 52, 66, .18);
   --f-ui: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
   --f-num: Bahnschrift, "DIN Alternate", "DIN 2014", "Segoe UI", sans-serif;
   --r: 8px;
 }
+/* Themes: exactly four. Each sets every color token; components read only tokens.
+   The server stamps the saved theme on <html data-theme>; preview swatches reuse the
+   same blocks by carrying data-theme themselves. Harbor Tide follows Windows light/dark. */
+:root, [data-theme="harbor"] {
+  color-scheme: light;
+  --ground: #e6eeeb; --panel: #ffffff; --panel-2: #f2f7f5; --ink: #0f2a33; --ink-2: #3a5761; --ink-3: #536f79;
+  --line: #cddbd6; --line-2: #e0e9e5;
+  --rail: #0e3442; --rail-2: #164a5b; --rail-ink: #e2efea; --rail-ink-2: #a9cbc1; --rail-line: #22596a; --rail-hover: rgba(226, 239, 234, .06);
+  --foam: #3f9b88; --foam-ink: #1b6a5a; --foam-bg: #dcefe8;
+  --buoy: #d9581c; --buoy-ink: #a3400f; --buoy-bg: #fbe6da;
+  --storm: #c4372d; --storm-ink: #a12a21; --storm-bg: #f8e0dc;
+  --brass: #b08a1e; --brass-ink: #765c10; --sand: #dcc790; --mist: #a3b6bb;
+  --btn: #0e3442; --btn-ink: #ffffff; --btn-hover: #164a5b; --pick: #0e3442; --pick-ink: #e2efea; --sel-ink: #ffffff;
+  --brand-tile: #164a5b; --brand-wave: #4fc1a8; --brand-arrow: #e2efea;
+  --shadow: 0 1px 2px rgba(14, 52, 66, .06), 0 6px 18px -8px rgba(14, 52, 66, .18);
+  --btn-shadow: 0 1px 1px rgba(14, 52, 66, .05); --scrim: rgba(6, 18, 23, .45);
+}
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root, [data-theme="harbor"] {
+    color-scheme: dark;
     --ground: #08171d; --panel: #0e232b; --panel-2: #122c36; --ink: #e2eeea; --ink-2: #a8c4bd; --ink-3: #8eada6;
     --line: #1f3d47; --line-2: #183540;
     --rail: #0c3340; --rail-2: #154656; --rail-ink: #e2eeea; --rail-ink-2: #a3c7bd; --rail-line: #1e5262;
@@ -29,14 +38,60 @@
     --buoy: #f08a4b; --buoy-ink: #f6a877; --buoy-bg: #3a2416;
     --storm: #ff7b6f; --storm-ink: #ff9d93; --storm-bg: #3d1b19;
     --brass: #d4b04a; --brass-ink: #e3c66d; --sand: #8c7a45; --mist: #56717a;
-    --btn: #4fc1a8; --btn-ink: #062019; --btn-hover: #6fd1bb;
+    --btn: #4fc1a8; --btn-ink: #062019; --btn-hover: #6fd1bb; --pick: #0c3340; --pick-ink: #e2eeea; --sel-ink: #062019;
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 22px -10px rgba(0, 0, 0, .6);
+    --btn-shadow: 0 1px 1px rgba(0, 0, 0, .3); --scrim: rgba(2, 8, 11, .6);
   }
+}
+/* Midnight: deep navy night shift, cool cyan for action and health. */
+[data-theme="midnight"] {
+  color-scheme: dark;
+  --ground: #0f1623; --panel: #172131; --panel-2: #1d2a3d; --ink: #e6ebf2; --ink-2: #b4bfcd; --ink-3: #98a5b8;
+  --line: #2c3b52; --line-2: #233147;
+  --rail: #0a101b; --rail-2: #1a2639; --rail-ink: #e6ebf2; --rail-ink-2: #a3b0c3; --rail-line: #1f2b3f; --rail-hover: rgba(230, 235, 242, .06);
+  --foam: #4ec3d4; --foam-ink: #8bd9e6; --foam-bg: #133445;
+  --buoy: #f0a04b; --buoy-ink: #f7bf82; --buoy-bg: #3a2a18;
+  --storm: #ff7a86; --storm-ink: #ffa4ac; --storm-bg: #3f1d26;
+  --brass: #d6b656; --brass-ink: #e6cd80; --sand: #7d6d3e; --mist: #5d6c82;
+  --btn: #4ec3d4; --btn-ink: #06141d; --btn-hover: #74d3e1; --pick: #2c4a6b; --pick-ink: #f1f5fa; --sel-ink: #06141d;
+  --brand-tile: #1a2639; --brand-wave: #4ec3d4; --brand-arrow: #e6ebf2;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 8px 22px -10px rgba(0, 0, 0, .55);
+  --btn-shadow: 0 1px 1px rgba(0, 0, 0, .3); --scrim: rgba(3, 6, 12, .6);
+}
+/* Paper: warm office paper, a light side bar, ink-blue for action, orange only for attention. */
+[data-theme="paper"] {
+  color-scheme: light;
+  --ground: #f6f4ef; --panel: #ffffff; --panel-2: #f2efe8; --ink: #1d2430; --ink-2: #4a5362; --ink-3: #5d6674;
+  --line: #ddd8cd; --line-2: #ece8df;
+  --rail: #edeae2; --rail-2: #e0dcd1; --rail-ink: #1d2430; --rail-ink-2: #4f5867; --rail-line: #d8d2c5; --rail-hover: rgba(29, 36, 48, .05);
+  --foam: #3a72b8; --foam-ink: #24548f; --foam-bg: #e4ecf7;
+  --buoy: #d4651c; --buoy-ink: #a34c0f; --buoy-bg: #fbeadc;
+  --storm: #c93a3a; --storm-ink: #a32a2a; --storm-bg: #f9e2e0;
+  --brass: #a07d1c; --brass-ink: #6f5612; --sand: #e2cf9a; --mist: #aaa69c;
+  --btn: #24548f; --btn-ink: #ffffff; --btn-hover: #1c4677; --pick: #24548f; --pick-ink: #ffffff; --sel-ink: #ffffff;
+  --brand-tile: #24548f; --brand-wave: #9cc3ef; --brand-arrow: #ffffff;
+  --shadow: 0 1px 2px rgba(40, 34, 20, .06), 0 6px 18px -10px rgba(40, 34, 20, .16);
+  --btn-shadow: 0 1px 1px rgba(40, 34, 20, .05); --scrim: rgba(29, 36, 48, .4);
+}
+/* Forest: evergreen rail, sage ground, leaf green for action, amber for attention. */
+[data-theme="forest"] {
+  color-scheme: light;
+  --ground: #e7ede4; --panel: #fbfcf8; --panel-2: #eff3eb; --ink: #1b2a20; --ink-2: #435549; --ink-3: #54665a;
+  --line: #cbd7c9; --line-2: #dfe7dc;
+  --rail: #1f3a2c; --rail-2: #2b4c3a; --rail-ink: #eef3e6; --rail-ink-2: #b6cab3; --rail-line: #33563f; --rail-hover: rgba(238, 243, 230, .07);
+  --foam: #4a8f5f; --foam-ink: #2c6840; --foam-bg: #dcecd8;
+  --buoy: #b97a12; --buoy-ink: #875405; --buoy-bg: #f8ebcf;
+  --storm: #c2412d; --storm-ink: #a12f1e; --storm-bg: #f7dfd9;
+  --brass: #8a6440; --brass-ink: #66472b; --sand: #d9c690; --mist: #a5b3a3;
+  --btn: #2c6840; --btn-ink: #ffffff; --btn-hover: #245836; --pick: #1f3a2c; --pick-ink: #eef3e6; --sel-ink: #ffffff;
+  --brand-tile: #2b4c3a; --brand-wave: #8fcf9b; --brand-arrow: #eef3e6;
+  --shadow: 0 1px 2px rgba(31, 58, 44, .06), 0 6px 18px -8px rgba(31, 58, 44, .18);
+  --btn-shadow: 0 1px 1px rgba(31, 58, 44, .05); --scrim: rgba(14, 28, 20, .45);
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--ground); color: var(--ink); font: 15px/1.5 var(--f-ui); accent-color: var(--foam); caret-color: var(--foam); }
-::selection { background: var(--foam); color: #fff; }
+::selection { background: var(--foam); color: var(--sel-ink); }
 * { scrollbar-color: var(--mist) transparent; scrollbar-width: thin; }
 :focus-visible { outline: 2px solid var(--foam); outline-offset: 2px; border-radius: 4px; }
 a { color: var(--foam-ink); text-underline-offset: 3px; }
@@ -55,7 +110,7 @@ button { font: inherit; color: inherit; }
 .brand-name span { color: var(--foam); }
 .nav { display: grid; gap: 2px; }
 .nav button { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 0; background: none; color: var(--rail-ink-2); border-radius: 6px; cursor: pointer; text-align: left; font-weight: 500; transition: background .15s, color .15s; }
-.nav button:hover { background: rgba(226, 239, 234, .06); color: var(--rail-ink); }
+.nav button:hover { background: var(--rail-hover); color: var(--rail-ink); }
 .nav button[aria-current="page"] { background: var(--rail-2); color: var(--rail-ink); position: relative; }
 .nav button[aria-current="page"]::after { content: ""; position: absolute; right: 10px; top: 50%; width: 7px; height: 12px; margin-top: -6px; background: var(--foam); clip-path: polygon(0 0, 100% 50%, 0 100%); }
 .nav button[aria-current="page"] .count { margin-right: 14px; }
@@ -77,7 +132,7 @@ button { font: inherit; color: inherit; }
 .pagehead p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; }
 .actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
 
-.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-weight: 600; font-size: 14px; cursor: pointer; transition: background .15s, border-color .15s, transform .1s; box-shadow: 0 1px 1px rgba(14, 52, 66, .05); }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-weight: 600; font-size: 14px; cursor: pointer; transition: background .15s, border-color .15s, transform .1s; box-shadow: var(--btn-shadow); }
 .btn:hover:not(:disabled) { border-color: var(--mist); background: var(--panel-2); }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
@@ -204,7 +259,7 @@ input[type="search"] { width: 100%; padding-left: 34px; }
 input:hover, select:hover { border-color: var(--mist); }
 .segmented { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); padding: 3px; gap: 2px; }
 .segmented button { border: 0; background: none; padding: 6px 12px; border-radius: 5px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
-.segmented button[aria-pressed="true"] { background: var(--rail); color: var(--rail-ink); }
+.segmented button[aria-pressed="true"] { background: var(--pick); color: var(--pick-ink); }
 .result-count { margin-left: auto; color: var(--ink-3); font-size: 13.5px; }
 
 .table-shell { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; }
@@ -247,6 +302,20 @@ tbody tr.row:focus-visible td:first-child { box-shadow: inset 2px 0 0 var(--foam
 .field-msg:empty { margin-top: 0; }
 .field-msg.err { color: var(--storm-ink); }
 .field-msg.ok { color: var(--foam-ink); }
+/* theme picker: each preview carries its own data-theme, so it shows that theme's tokens */
+.themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.theme-opt { display: grid; grid-template-columns: auto 64px minmax(0, 1fr); align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); cursor: pointer; transition: border-color .15s, background .15s; }
+.theme-opt:hover { border-color: var(--mist); background: var(--panel-2); }
+.theme-opt:has(input:checked) { border-color: var(--foam); box-shadow: inset 0 0 0 1px var(--foam); }
+.theme-opt:has(input:focus-visible) { outline: 2px solid var(--foam); outline-offset: 2px; }
+.theme-opt input { margin: 0; width: 16px; height: 16px; }
+.theme-opt input:focus-visible { outline: none; }
+.theme-opt b { display: block; font: 600 15px/1.3 var(--f-num); }
+.theme-opt small { display: block; color: var(--ink-2); font-size: 12.5px; line-height: 1.35; }
+.theme-prev { position: relative; height: 40px; border-radius: 4px; border: 1px solid var(--line); background: var(--ground); overflow: hidden; }
+.theme-prev i:nth-child(1) { position: absolute; inset: 0 auto 0 0; width: 16px; background: var(--rail); }
+.theme-prev i:nth-child(2) { position: absolute; left: 22px; right: 6px; top: 7px; bottom: 7px; border-radius: 4px; background: var(--panel); border: 1px solid var(--line); }
+.theme-prev i:nth-child(3) { position: absolute; left: 27px; bottom: 13px; width: 12px; height: 4px; border-radius: 999px; background: var(--foam); box-shadow: 16px 0 0 var(--buoy); }
 .slots { display: flex; gap: 5px; flex-wrap: wrap; margin: 16px 0 6px; }
 .slots i { width: 22px; height: 30px; border-radius: 4px; border: 1.5px solid var(--line); background: var(--panel-2); }
 .slots i.used { background: var(--foam); border-color: var(--foam); }
@@ -258,7 +327,7 @@ tbody tr.row:focus-visible td:first-child { box-shadow: inset 2px 0 0 var(--foam
 
 /* ---------- dialogs & toasts ---------- */
 dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); padding: 0; box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .45); max-width: min(520px, calc(100vw - 32px)); }
-dialog::backdrop { background: rgba(6, 18, 23, .45); }
+dialog::backdrop { background: var(--scrim); }
 .dlg { padding: 22px 22px 18px; }
 .dlg h3 { margin: 0 0 8px; font: 600 18px var(--f-num); }
 .dlg p { margin: 0; color: var(--ink-2); }
@@ -356,7 +425,7 @@ dialog.drawer { margin: 0 0 0 auto; height: 100vh; max-height: 100vh; width: min
 <div class="app">
   <aside class="rail">
     <div class="brand">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#164a5b"/><path d="M6 21c2.5 0 3-2.5 5-2.5s2.5 2.5 5 2.5 2.5-2.5 5-2.5 2.5 2.5 5 2.5" fill="none" stroke="#4fc1a8" stroke-width="2.2" stroke-linecap="round"/><path d="M16 6v9M12.5 9.5 16 6l3.5 3.5" fill="none" stroke="#e2efea" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" style="fill:var(--brand-tile)"/><path d="M6 21c2.5 0 3-2.5 5-2.5s2.5 2.5 5 2.5 2.5-2.5 5-2.5 2.5 2.5 5 2.5" fill="none" style="stroke:var(--brand-wave)" stroke-width="2.2" stroke-linecap="round"/><path d="M16 6v9M12.5 9.5 16 6l3.5 3.5" fill="none" style="stroke:var(--brand-arrow)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span class="brand-name">Solution<span>Sync</span></span>
     </div>
     <nav class="nav" aria-label="Main">
@@ -444,6 +513,7 @@ dialog.drawer { margin: 0 0 0 auto; height: 100vh; max-height: 100vh; width: min
     <!-- settings -->
     <section data-section="settings" hidden>
       <div class="settings-grid">
+        <div style="display:grid;gap:22px">
         <section class="panel" aria-labelledby="lim-h">
           <div class="panel-head"><h2 id="lim-h">Daily upload limit</h2></div>
           <div class="panel-body">
@@ -463,6 +533,28 @@ dialog.drawer { margin: 0 0 0 auto; height: 100vh; max-height: 100vh; width: min
             <div class="slots-note" id="slots-note"></div>
           </div>
         </section>
+        <section class="panel" aria-labelledby="theme-h">
+          <div class="panel-head"><h2 id="theme-h">Theme</h2><span class="meta" id="theme-now"></span></div>
+          <div class="panel-body">
+            <p class="help">Changes the colors right away and is remembered, in this dashboard and the desktop app.</p>
+            <div class="themes" role="radiogroup" aria-labelledby="theme-h">
+              <label class="theme-opt"><input type="radio" name="theme" value="harbor">
+                <span class="theme-prev" data-theme="harbor" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span><b>Harbor Tide</b><small>Teal rail and sea-glass. Light or dark with Windows.</small></span></label>
+              <label class="theme-opt"><input type="radio" name="theme" value="midnight">
+                <span class="theme-prev" data-theme="midnight" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span><b>Midnight</b><small>Deep navy for night use, cyan accents.</small></span></label>
+              <label class="theme-opt"><input type="radio" name="theme" value="paper">
+                <span class="theme-prev" data-theme="paper" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span><b>Paper</b><small>Bright warm white, ink-blue accents.</small></span></label>
+              <label class="theme-opt"><input type="radio" name="theme" value="forest">
+                <span class="theme-prev" data-theme="forest" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span><b>Forest</b><small>Evergreen rail and sage, amber for attention.</small></span></label>
+            </div>
+            <div class="field-msg" id="theme-msg" role="status"></div>
+          </div>
+        </section>
+        </div>
         <div style="display:grid;gap:22px">
           <section class="panel" aria-labelledby="today-h">
             <div class="panel-head"><h2 id="today-h">Today</h2></div>
@@ -578,12 +670,15 @@ function show(view) {
 
 // ---------------------------------------------------------------- data loading
 async function loadAll() {
+  const epoch = themeEpoch;   // a theme picked while this request runs wins over its (older) answer
   const [o, s] = await Promise.all([API("/api/overview"), API("/api/solutions")])
     .catch(e => [{ status: 0, data: { error: String(e) } }, { status: 0, data: [] }]);
   const err = $("#load-error");
   if (o.status !== 200) { err.hidden = false; err.textContent = "Cannot load data: " + (o.data.error || "the dashboard server is not reachable. Is py -m solsync dashboard still running?"); return; }
   err.hidden = true;
   state.overview = o.data;
+  // follow a theme picked in the other window (web or desktop) without fighting a save in progress
+  if (epoch === themeEpoch && !themeSaving && o.data.theme && o.data.theme !== document.documentElement.dataset.theme) applyTheme(o.data.theme);
   if (s.status === 200) state.solutions = s.data;
   renderAll();
 }
@@ -979,6 +1074,31 @@ function renderAutomation() {
     icon(t.state === "Disabled" ? "play" : "pause"), t.state === "Disabled" ? "Resume automation" : "Pause automation")
     : el("p", { class: "muted", style: "margin:0" }, "Install the daily task with scripts\\install_task.ps1 (see the README)."));
 }
+
+// ---------------------------------------------------------------- theme
+const THEMES = { harbor: "Harbor Tide", midnight: "Midnight", paper: "Paper", forest: "Forest" };
+let themeSaving = false, themeEpoch = 0;
+function applyTheme(t) {
+  if (!THEMES[t]) t = "harbor";
+  document.documentElement.dataset.theme = t;
+  document.querySelectorAll('input[name="theme"]').forEach(r => r.checked = r.value === t);
+  $("#theme-now").textContent = "Current: " + THEMES[t];
+}
+document.querySelectorAll('input[name="theme"]').forEach(radio => radio.onchange = async () => {
+  const prev = document.documentElement.dataset.theme, t = radio.value, m = $("#theme-msg");
+  applyTheme(t); themeSaving = true; themeEpoch++;   // show it now; the save only makes it stick
+  const r = await API("/api/settings", { method: "POST", body: JSON.stringify({ theme: t }) }).catch(() => ({ data: {} }));
+  themeSaving = false;
+  if (r.data.ok) {
+    if (state.overview) state.overview.theme = t;
+    m.className = "field-msg ok"; m.textContent = `${THEMES[t]} saved. It stays after a restart.`;
+  } else {
+    applyTheme(prev);
+    m.className = "field-msg err"; m.textContent = `${r.data.message || "The dashboard server could not be reached."} ${THEMES[prev] || "The previous theme"} is still in use.`;
+    toast("Theme not saved.", false);
+  }
+});
+applyTheme(document.documentElement.dataset.theme);
 
 // ---------------------------------------------------------------- polling
 let timer;

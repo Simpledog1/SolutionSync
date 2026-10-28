@@ -24,8 +24,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from . import __version__
-from .config import (FROZEN, MANILA, PROJECT_ROOT, ConfigError, data_root, load_config,
-                     manila_day, manila_now, save_daily_limit)
+from .config import (DEFAULT_THEME, FROZEN, MANILA, PROJECT_ROOT, ConfigError, data_root,
+                     load_config, manila_day, manila_now, save_daily_limit, save_theme)
 from .ledger import Ledger
 
 TASK_NAME = "SolutionSync Daily"
@@ -186,6 +186,7 @@ def overview(cfg, ledger: Ledger, rows: list[dict]) -> dict:
         "automation": {"state": state, "task": task, "running": run,
                        "uploads_enabled": cfg.uploads_enabled},
         "checks": {p: json.loads(ledger.get_meta(f"check:{p}", "null")) for p in cfg.repos},
+        "theme": cfg.theme,
     }
 
 
@@ -276,7 +277,14 @@ def make_handler(root: Path, jobs: JobRunner, port: int):
                 return self._send(403, {"error": "forbidden"})
             path = urllib.parse.urlsplit(self.path).path
             if path == "/":
-                return self._send(200, PAGE.read_bytes(), "text/html; charset=utf-8")
+                try:
+                    theme = load_config(root=root).theme  # already one of THEMES
+                except ConfigError:
+                    theme = DEFAULT_THEME  # the page itself reports the config problem
+                # set before first paint, so the saved theme never flashes the default
+                page = PAGE.read_bytes().replace(b'<html lang="en">',
+                                                 f'<html lang="en" data-theme="{theme}">'.encode(), 1)
+                return self._send(200, page, "text/html; charset=utf-8")
             if path == "/api/ping":  # lets the desktop app recognise a SolutionSync server
                 return self._send(200, {"app": "SolutionSync", "version": __version__,
                                         "data_root": str(root), "pid": os.getpid()})
@@ -318,6 +326,13 @@ def make_handler(root: Path, jobs: JobRunner, port: int):
             return self._send(404, {"error": "not found"})
 
         def _settings(self, body: dict) -> None:
+            if "theme" in body:  # appearance only: never touches the limit, quota or jobs
+                try:
+                    return self._send(200, {"ok": True, "theme": save_theme(body["theme"], root / "config.json")})
+                except ConfigError as exc:
+                    return self._send(400, {"ok": False, "message": str(exc)})
+                except (OSError, ValueError) as exc:
+                    return self._send(500, {"ok": False, "message": f"could not save the theme: {exc}"})
             cfg, ledger = self._data()
             try:
                 value = body.get("daily_limit")
