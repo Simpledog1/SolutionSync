@@ -15,6 +15,18 @@ instead of one giant dump. It runs by itself once a day using Windows Task Sched
 
 > **Windows only.** It uses Windows Task Scheduler and Windows Credential Manager.
 
+### Two ways to use it
+
+| | How you open it | Needs Python? |
+|---|---|---|
+| **Web dashboard** | `py -m solsync dashboard` opens it in your browser at `http://127.0.0.1:8765` | Yes |
+| **Desktop app** | Start menu → **SolutionSync**, in its own window | No, Python is bundled |
+
+Both show the same dashboard and share the same settings, upload history and daily limit;
+you can switch between them at any time. The desktop app is built with
+`scripts\build_desktop.ps1`; see **[DESKTOP.md](DESKTOP.md)** for building, installing,
+where your data lives, updates and troubleshooting.
+
 ---
 
 ## Contents

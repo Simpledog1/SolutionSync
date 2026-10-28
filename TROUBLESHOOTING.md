@@ -1,5 +1,7 @@
 # Troubleshooting
 
+See also [DESKTOP.md](DESKTOP.md#troubleshooting) for the desktop app.
+
 Start with these two commands. They show what went wrong without changing anything.
 
 ```powershell
